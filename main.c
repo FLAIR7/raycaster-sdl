@@ -4,10 +4,10 @@
 #include <math.h>
 
 // screen
-#define WIDTH           500
-#define HALF_WIDTH      250
-#define HEIGHT          400
-#define HALF_HEIGHT     200
+#define WIDTH           800
+#define HALF_WIDTH      400
+#define HEIGHT          600
+#define HALF_HEIGHT     300
 
 // FPS
 #define FPS 60
@@ -20,28 +20,45 @@ SDL_Renderer* renderer;
 int gameLoop = 1;
 
 // map
-#define MAP_SIZE    16
-#define MAP_SCALE   25
+#define MAP_SIZE    32
+#define MAP_SCALE   10
 #define MAP_RANGE   MAP_SCALE * MAP_SIZE
 #define MAP_SPEED   (MAP_SCALE / 2) / 10
+int showMap = 0;
 
 int map[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 
-    1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 
-    1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 };
 
 // player 
@@ -57,7 +74,12 @@ double playerMoveAngle = 0;
 #define FOV         (PI / 3)
 #define HALF_FOV    (FOV / 2)
 #define STEP_ANGLE  (FOV / WIDTH);
-
+#define min(a,b)             \
+({                           \
+    __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a < _b ? _a : _b;       \
+})
 
 void input(void){
     SDL_Event event;
@@ -75,9 +97,12 @@ void input(void){
                 case SDLK_LEFT:
                     playerMoveAngle = 0;
                     break;
+                case SDLK_LSHIFT:
+                    showMap = 0;
+                    break;
             }
         }
-        if(event.type == SDL_KEYDOWN)
+        else if(event.type == SDL_KEYDOWN)
         {
             switch(event.key.keysym.sym){
                 case SDL_QUIT:
@@ -100,6 +125,9 @@ void input(void){
                 case SDLK_RIGHT:
                     playerMoveAngle = -1;
                     break;
+                case SDLK_LSHIFT:
+                    showMap = 1;
+                    break;
             }
         }
     }
@@ -117,55 +145,15 @@ void update(void){
     if(playerMoveAngle) playerAngle += 0.03 * playerMoveAngle;
 }
 
-
-
 void render(void){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
     
     // Calculate map and player offsets
-    int mapOffsetX = floor(WIDTH / 2 - MAP_RANGE / 2);
-    int mapOffsetY = floor(HEIGHT / 2 - MAP_RANGE / 2);
-    double playerMapX = playerX + mapOffsetX;
-    double playerMapY = playerY + mapOffsetY;
-    
-    // Draw 2d map
-    for(int row = 0; row < MAP_SIZE; row++){
-        for(int col = 0; col < MAP_SIZE; col++){
-            int square = row * MAP_SIZE + col;
-            if(map[square] != 0){
-                SDL_Rect squareMap = {
-                    mapOffsetX + col * MAP_SCALE,
-                    mapOffsetY + row * MAP_SCALE,
-                    MAP_SCALE - 1,
-                    MAP_SCALE - 1
-                };
-                SDL_SetRenderDrawColor(renderer, 0, 102, 102, 255);
-                SDL_RenderFillRect(renderer, &squareMap);
-            } else {
-                SDL_Rect squareMap = {
-                    mapOffsetX + col * MAP_SCALE,
-                    mapOffsetY + row * MAP_SCALE,
-                    MAP_SCALE,
-                    MAP_SCALE,
-                };
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                SDL_RenderFillRect(renderer, &squareMap);
-            }
-        }
-    }
-    
-    // draw the player on 2D
-    SDL_Rect player = {
-        playerMapX,
-        playerMapY,
-        5,
-        5
-    };
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &player);
-
-    // player arm
-    SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(playerAngle) * 15, playerMapY + cos(playerAngle) * 15); 
+    int mapOffsetX = floor(WIDTH / 2)- 400;
+    int mapOffsetY = 0;
+    double playerMapX = (playerX / MAP_SCALE) * 10 + mapOffsetX;
+    double playerMapY = (playerY / MAP_SCALE) * 10 + mapOffsetY;
     
     // raycasting
     double currentAngle = playerAngle + HALF_FOV;
@@ -227,22 +215,70 @@ void render(void){
             double mapTargetY = floor(rayEndY / MAP_SCALE);
             if(currentCos <= 0)
                 mapTargetY += rayDirectionY;
-            double targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
+            int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
             if(targetSquare < 0 || targetSquare > sizeof(map) / sizeof(*map) - 1)  break;
-            if(map[(int)targetSquare] != 0) break;
+            if(map[targetSquare] != 0) break;
             rayEndY += rayDirectionY * MAP_SCALE;
         }
+    
+        // 3D
+        double depth = verticalDepth < horizontalDepth ? verticalDepth : horizontalDepth;
+        depth *= cos(playerAngle - currentAngle);        
+        double wallHeight = min(MAP_SCALE * 800 / (depth + 0.0001), HEIGHT);
+        SDL_Rect wall = {
+            mapOffsetX + ray,
+            mapOffsetY + (HEIGHT / 2 - wallHeight / 2),
+            1,
+            wallHeight
+        };
+        SDL_RenderFillRect(renderer, &wall);
 
-        double endX = verticalDepth < horizontalDepth ? tempX : rayEndX;
-        double endY = verticalDepth < horizontalDepth ? tempY : rayEndY;
-
-        SDL_RenderDrawLine(renderer, playerMapX, playerMapY, endX + mapOffsetX, endY + mapOffsetY);
-
-        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-
+        if(verticalDepth < horizontalDepth)
+            SDL_SetRenderDrawColor(renderer, 170, 170, 170, 255);
+        else 
+            SDL_SetRenderDrawColor(renderer, 85, 85, 85, 255);
+        
         currentAngle -= STEP_ANGLE;
     }
-    
+    if(showMap){
+        for(int row = 0; row < MAP_SIZE; row++){
+            for(int col = 0; col < MAP_SIZE; col++){
+                int square = row * MAP_SIZE + col;
+                if(map[square] != 0){
+                    SDL_Rect squareMap = {
+                        mapOffsetX + col * 10,
+                        mapOffsetY + row * 10,
+                        10 - 1,
+                        10 - 1
+                    };
+                    SDL_SetRenderDrawColor(renderer, 0, 102, 102, 255);
+                    SDL_RenderFillRect(renderer, &squareMap);
+                } else {
+                    SDL_Rect squareMap = {
+                        mapOffsetX + col * 10,
+                        mapOffsetY + row * 10,
+                        10,
+                        10,
+                    };
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                    SDL_RenderFillRect(renderer, &squareMap);
+                }
+            }
+        }
+        
+        // draw the player on 2D
+        SDL_Rect player = {
+            playerMapX,
+            playerMapY,
+            5,
+            5
+        };
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &player);
+        
+        // player arm
+        SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(playerAngle) * 15, playerMapY + cos(playerAngle) * 15);
+    }
     SDL_RenderPresent(renderer);
 }
 

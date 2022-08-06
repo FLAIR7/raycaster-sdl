@@ -2,6 +2,7 @@
 Just a simple raycaster using SDL and c.
 
 <img src="./screenshots/ray.png" alt="ray"/>
+<img src="./screenshots/3d.png" alt="3d"/>
 
 ## Overview
 I made this project because I want to knew how raycaster works and to see how SDL works. I'm not that good in c, so if you would like to clone the code and make some pull request, I would be so glad. (even if was just to correct my poor grammar in english, or change the variables/functions names to better names).
