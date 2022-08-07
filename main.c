@@ -1,3 +1,5 @@
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_render.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
@@ -8,6 +10,7 @@
 #define HALF_WIDTH      400
 #define HEIGHT          600
 #define HALF_HEIGHT     300
+#define PI 3.14159265359
 
 // FPS
 #define FPS 60
@@ -28,7 +31,6 @@
 // CONSTANTS
 SDL_Window* window;
 SDL_Renderer* renderer;
-#define PI 3.14159265359
 
 int gameLoop = 1;
 
@@ -160,16 +162,41 @@ void update(void){
     if(player.playerMoveAngle) player.playerAngle += 0.03 * player.playerMoveAngle;
 }
 
+void drawSky(void){
+    SDL_Rect skyRect = {
+        0,
+        0, 
+        WIDTH,
+        WIDTH
+    };
+    SDL_SetRenderDrawColor(renderer, 139, 185, 249, 255);
+    SDL_RenderFillRect(renderer, &skyRect);
+}
+
+void drawFloor(void){
+    SDL_Rect floorRect = {
+        0,
+        HEIGHT / 2,
+        WIDTH,
+        HEIGHT / 2
+    };
+    SDL_SetRenderDrawColor(renderer, 52, 158, 0, 255);
+    SDL_RenderFillRect(renderer, &floorRect);
+}
+
 void render(void){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
+    drawSky();
+    drawFloor();
+
     // Calculate map and player offsets
     int mapOffsetX = floor(WIDTH / 2)- 400;
     int mapOffsetY = 0;
     float playerMapX = (player.playerX / MAP_SCALE) * 10 + mapOffsetX;
     float playerMapY = (player.playerY / MAP_SCALE) * 10 + mapOffsetY;
-    
+
     // raycasting
     float currentAngle = player.playerAngle + HALF_FOV;
     float rayStartX = floor(player.playerX / MAP_SCALE) * MAP_SCALE;
@@ -232,11 +259,11 @@ void render(void){
             if(map[targetSquare] != 0) break;
             rayEndY += rayDirectionY * MAP_SCALE;
         }
-    
+        
         // 3D
         float depth = verticalDepth < horizontalDepth ? verticalDepth : horizontalDepth;
         depth *= cos(player.playerAngle - currentAngle);        
-        float wallHeight = MIN(MAP_SCALE * 800 / (depth + 0.0001), HEIGHT);
+        float wallHeight = MIN(floor(MAP_SCALE * 800 / (depth + 0.0001)), HEIGHT);
         SDL_Rect wall = {
             mapOffsetX + ray,
             mapOffsetY + (HEIGHT / 2 - wallHeight / 2),
@@ -290,8 +317,8 @@ void render(void){
         
         // player arm
         SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(player.playerAngle) * 15, playerMapY + cos((player.playerAngle)) * 15);
-      
     }
+    
     SDL_RenderPresent(renderer);
 }
 

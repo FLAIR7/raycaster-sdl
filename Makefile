@@ -1,7 +1,11 @@
 CC=gcc
 
+CFLAGS += -Wall -Wextra -Wpedantic \
+          -Wwrite-strings -Wshadow \
+          -O2 -std=c99
+
 build:
-	$(CC) -Wall -Wextra -pedantic -std=c99 -O2  main.c -lm -lSDL2 -o main
+	$(CC) $(CFLAGS) main.c -lm -lSDL2 -o main
 
 run:
 	./main
