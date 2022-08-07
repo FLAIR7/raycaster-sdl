@@ -1,5 +1,7 @@
+CC=gcc
+
 build:
-	gcc main.c -lm -lSDL2 -o main
+	$(CC) -Wall -Wextra -pedantic -std=c99 -O2  main.c -lm -lSDL2 -o main
 
 run:
 	./main

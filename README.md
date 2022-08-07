@@ -16,10 +16,18 @@ This project requires the following libraries:
 ## Compiling
 Just run a `make`, or if you like to type the command:
 
-`gcc main.c -lm -lSDL2 -o main`
+`gcc -Wall -Wextra -pedantic -std=c99 -O2 main.c -lm -lSDL2 -o main`
 
 ## Run
 run ./main after compiling
+
+## Using 
+
+`Up`        move forward
+`Down`      move backward
+`Left`      turn left
+`Right`     turn right
+`LShift`    open map 
 
 ## Construction
 I'll probably come back here later to improve the cod :)

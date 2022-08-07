@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 
-// screen
+// SCREEN
 #define WIDTH           800
 #define HALF_WIDTH      400
 #define HEIGHT          600
@@ -12,20 +12,33 @@
 // FPS
 #define FPS 60
 
-// constants
+// CAMERA
+#define DOUBLE_PI   (2 * PI)
+#define FOV         (PI / 3)
+#define HALF_FOV    (FOV / 2)
+#define STEP_ANGLE  (FOV / WIDTH);
+/*#define MIN(a,b)             \
+({                           \
+    __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a < _b ? _a : _b;       \
+})*/
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
+// CONSTANTS
 SDL_Window* window;
 SDL_Renderer* renderer;
 #define PI 3.14159265359
 
 int gameLoop = 1;
 
-// map
+// MAP
 #define MAP_SIZE    32
 #define MAP_SCALE   10
 #define MAP_RANGE   MAP_SCALE * MAP_SIZE
 #define MAP_SPEED   (MAP_SCALE / 2) / 10
-int showMap = 0;
 
+int showMap = 0;
 int map[] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -60,26 +73,19 @@ int map[] = {
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 };
+int map_realsize = sizeof map / sizeof map[0]; // the lenght of the map
 
-// player 
-double playerX = MAP_SCALE + 20;
-double playerY = MAP_SCALE + 20;
-double playerAngle =  PI / 3;
-double playerMoveX = 0;
-double playerMoveY = 0;
-double playerMoveAngle = 0;
+// player
+typedef struct {
+    float playerX;          
+    float playerY;          
+    float playerAngle;      
+    float playerMoveX;      
+    float playerMoveY;      
+    float playerMoveAngle;  
+} Player;
 
-// camera
-#define DOUBLE_PI   (2 * PI)
-#define FOV         (PI / 3)
-#define HALF_FOV    (FOV / 2)
-#define STEP_ANGLE  (FOV / WIDTH);
-#define min(a,b)             \
-({                           \
-    __typeof__ (a) _a = (a); \
-    __typeof__ (b) _b = (b); \
-    _a < _b ? _a : _b;       \
-})
+Player player;
 
 void input(void){
     SDL_Event event;
@@ -90,12 +96,12 @@ void input(void){
             switch(event.key.keysym.sym){
                 case SDLK_DOWN:
                 case SDLK_UP:
-                    playerMoveX = 0;
-                    playerMoveY = 0;
+                    player.playerMoveX = 0;
+                    player.playerMoveY = 0;
                     break;
                 case SDLK_RIGHT:
                 case SDLK_LEFT:
-                    playerMoveAngle = 0;
+                    player.playerMoveAngle = 0;
                     break;
                 case SDLK_LSHIFT:
                     showMap = 0;
@@ -111,19 +117,19 @@ void input(void){
                 case SDLK_ESCAPE:
                     gameLoop = 0;
                     break;
-                case SDLK_DOWN:
-                    playerMoveX = -1;
-                    playerMoveY = -1;
-                    break;
                 case SDLK_UP:
-                    playerMoveX = 1;
-                    playerMoveY = 1;
+                    player.playerMoveX = 1;
+                    player.playerMoveY = 1;
+                    break;
+                case SDLK_DOWN:
+                    player.playerMoveX = -1;
+                    player.playerMoveY = -1;
                     break;
                 case SDLK_LEFT:
-                    playerMoveAngle = 1;
+                    player.playerMoveAngle = 1;
                     break;
                 case SDLK_RIGHT:
-                    playerMoveAngle = -1;
+                    player.playerMoveAngle = -1;
                     break;
                 case SDLK_LSHIFT:
                     showMap = 1;
@@ -133,16 +139,25 @@ void input(void){
     }
 }
 
-void update(void){
-    double playerOffsetX = sin(playerAngle) * MAP_SPEED;
-    double playerOffsetY = cos(playerAngle) * MAP_SPEED;
-    int mapTargetX = floor(playerY / MAP_SCALE) * MAP_SIZE + floor((playerX + playerOffsetX * playerMoveX) / MAP_SCALE);
-    int mapTargetY = floor((playerY + playerOffsetY * playerMoveY) / MAP_SCALE) * MAP_SIZE + floor(playerX / MAP_SCALE);
-    
+void setup(void){
+    player.playerX = MAP_SCALE + 20;
+    player.playerY = MAP_SCALE + 20;
+    player.playerMoveX = 0;
+    player.playerMoveY = 0;
+    player.playerMoveAngle = 0;
+    player.playerAngle = PI / 3;
+}
 
-    if(playerMoveX && map[mapTargetX] == 0) playerX += playerOffsetX * playerMoveX;
-    if(playerMoveY && map[mapTargetY] == 0) playerY += playerOffsetY * playerMoveY;
-    if(playerMoveAngle) playerAngle += 0.03 * playerMoveAngle;
+void update(void){
+    float playerOffsetX = sin(player.playerAngle) * MAP_SPEED;
+    float playerOffsetY = cos(player.playerAngle) * MAP_SPEED;
+    int mapTargetX = floor(player.playerY / MAP_SCALE) * MAP_SIZE + floor((player.playerX + playerOffsetX * player.playerMoveX) / MAP_SCALE);
+    int mapTargetY = floor((player.playerY + playerOffsetY * player.playerMoveY) / MAP_SCALE) * MAP_SIZE + floor(player.playerX / MAP_SCALE);
+    
+    // collision
+    if(player.playerMoveX && map[mapTargetX] == 0) player.playerX += playerOffsetX * player.playerMoveX;
+    if(player.playerMoveY && map[mapTargetY] == 0) player.playerY += playerOffsetY * player.playerMoveY;
+    if(player.playerMoveAngle) player.playerAngle += 0.03 * player.playerMoveAngle;
 }
 
 void render(void){
@@ -152,25 +167,25 @@ void render(void){
     // Calculate map and player offsets
     int mapOffsetX = floor(WIDTH / 2)- 400;
     int mapOffsetY = 0;
-    double playerMapX = (playerX / MAP_SCALE) * 10 + mapOffsetX;
-    double playerMapY = (playerY / MAP_SCALE) * 10 + mapOffsetY;
+    float playerMapX = (player.playerX / MAP_SCALE) * 10 + mapOffsetX;
+    float playerMapY = (player.playerY / MAP_SCALE) * 10 + mapOffsetY;
     
     // raycasting
-    double currentAngle = playerAngle + HALF_FOV;
-    double rayStartX = floor(playerX / MAP_SCALE) * MAP_SCALE;
-    double rayStartY = floor(playerY / MAP_SCALE) * MAP_SCALE;
+    float currentAngle = player.playerAngle + HALF_FOV;
+    float rayStartX = floor(player.playerX / MAP_SCALE) * MAP_SCALE;
+    float rayStartY = floor(player.playerY / MAP_SCALE) * MAP_SCALE;
 
     for(int ray = 0; ray < WIDTH; ray++){
-        double currentSin = sin(currentAngle);
-        double currentCos = cos(currentAngle);
+        float currentSin = sin(currentAngle);
+        float currentCos = cos(currentAngle);
         currentSin = currentSin ? currentSin : 0.000001;
         currentCos = currentCos ? currentCos : 0.000001;
         
         // vertical line intersection
-        double rayEndX;
-        double rayEndY;
-        double rayDirectionX;
-        double verticalDepth;
+        float rayEndX;
+        float rayEndY;
+        float rayDirectionX;
+        float verticalDepth;
         if(currentSin > 0){
             rayEndX = rayStartX + MAP_SCALE;
             rayDirectionX = 1;
@@ -180,26 +195,23 @@ void render(void){
         }
         
         for(int offset = 0; offset < MAP_RANGE; offset += MAP_SCALE){
-            verticalDepth = (rayEndX - playerX) / currentSin;
-            rayEndY = playerY + verticalDepth * currentCos;
-            double mapTargetX = floor(rayEndX / MAP_SCALE);
-            double mapTargetY = floor(rayEndY / MAP_SCALE);
+            verticalDepth = (rayEndX - player.playerX) / currentSin;
+            rayEndY = player.playerY + verticalDepth * currentCos;
+            float mapTargetX = floor(rayEndX / MAP_SCALE);
+            float mapTargetY = floor(rayEndY / MAP_SCALE);
             if(currentSin <= 0)
                 mapTargetX += rayDirectionX;
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
-            if(targetSquare < 0 || targetSquare > sizeof map / sizeof map[0]) break;
+            if(targetSquare < 0 || targetSquare > map_realsize) break;
             if(map[targetSquare] != 0) break;
             rayEndX += rayDirectionX * MAP_SCALE;
         }
-
-        double tempX = rayEndX;
-        double tempY = rayEndY;
         
         // horizontal line intersection
         rayEndY = 0;
         rayEndX = 0;
-        double rayDirectionY;
-        double horizontalDepth;
+        float rayDirectionY;
+        float horizontalDepth;
         if(currentCos > 0){
             rayEndY = rayStartY + MAP_SCALE;
             rayDirectionY = 1;
@@ -209,22 +221,22 @@ void render(void){
         }
 
         for(int offset = 0; offset < MAP_RANGE; offset += MAP_SCALE){
-            horizontalDepth = (rayEndY - playerY) / currentCos;
-            rayEndX = playerX + horizontalDepth * currentSin;
-            double mapTargetX = floor(rayEndX / MAP_SCALE);
-            double mapTargetY = floor(rayEndY / MAP_SCALE);
+            horizontalDepth = (rayEndY - player.playerY) / currentCos;
+            rayEndX = player.playerX + horizontalDepth * currentSin;
+            float mapTargetX = floor(rayEndX / MAP_SCALE);
+            float mapTargetY = floor(rayEndY / MAP_SCALE);
             if(currentCos <= 0)
                 mapTargetY += rayDirectionY;
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
-            if(targetSquare < 0 || targetSquare > sizeof(map) / sizeof(*map) - 1)  break;
+            if(targetSquare < 0 || targetSquare > map_realsize - 1)  break;
             if(map[targetSquare] != 0) break;
             rayEndY += rayDirectionY * MAP_SCALE;
         }
     
         // 3D
-        double depth = verticalDepth < horizontalDepth ? verticalDepth : horizontalDepth;
-        depth *= cos(playerAngle - currentAngle);        
-        double wallHeight = min(MAP_SCALE * 800 / (depth + 0.0001), HEIGHT);
+        float depth = verticalDepth < horizontalDepth ? verticalDepth : horizontalDepth;
+        depth *= cos(player.playerAngle - currentAngle);        
+        float wallHeight = MIN(MAP_SCALE * 800 / (depth + 0.0001), HEIGHT);
         SDL_Rect wall = {
             mapOffsetX + ray,
             mapOffsetY + (HEIGHT / 2 - wallHeight / 2),
@@ -267,17 +279,18 @@ void render(void){
         }
         
         // draw the player on 2D
-        SDL_Rect player = {
+        SDL_Rect player2d = {
             playerMapX,
             playerMapY,
             5,
             5
         };
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &player);
+        SDL_RenderFillRect(renderer, &player2d);
         
         // player arm
-        SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(playerAngle) * 15, playerMapY + cos(playerAngle) * 15);
+        SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(player.playerAngle) * 15, playerMapY + cos((player.playerAngle)) * 15);
+      
     }
     SDL_RenderPresent(renderer);
 }
@@ -289,10 +302,12 @@ void destroy_window(void){
 }
 
 void init(void){
-     if(SDL_Init(SDL_INIT_VIDEO) < 0){
+
+    if(SDL_Init(SDL_INIT_VIDEO) < 0){
         fprintf(stderr, "Error");
         exit(1);
     }
+
     window = SDL_CreateWindow("My game", HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     
     renderer = SDL_CreateRenderer(window, -1, 0);
@@ -301,12 +316,13 @@ void init(void){
         fprintf(stderr, "Error");
         exit(1);
     }
-    
 }
-
+    
 int main(void){
     init();
     
+    setup();
+
     Uint32 start; // to handle FPS
 
     while(gameLoop){
