@@ -1,14 +1,25 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <math.h>
+#include "textures.h"
 
 // SCREEN
+
 #define WIDTH           800
 #define HALF_WIDTH      400
 #define HEIGHT          600
 #define HALF_HEIGHT     300
 #define PI 3.14159265359
+
+/*#define TILE_SIZE 64
+#define WIDTH 32 * TILE_SIZE
+#define HEIGHT 32 * TILE_SIZE
+#define HALF_WIDTH (WIDTH / 2)
+#define HALF_HEIGHT (HEIGHT / 2)
+#define PI 3.14159265359*/
+
 
 // FPS
 #define FPS 60
@@ -29,50 +40,37 @@
 // CONSTANTS
 SDL_Window* window;
 SDL_Renderer* renderer;
-SDL_Texture* texture;
 
 int gameLoop = 1;
 
 // MAP
-#define MAP_SIZE    32
-#define MAP_SCALE   10
+#define MAP_SIZE    20
+#define MAP_SCALE   64
 #define MAP_RANGE   MAP_SCALE * MAP_SIZE
 #define MAP_SPEED   (MAP_SCALE / 2) / 10
 
 int showMap = 0;
 const int map[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
+    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 
+    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 
 };
 int map_realsize = sizeof map / sizeof map[0]; // the lenght of the map
 
@@ -87,6 +85,13 @@ typedef struct {
 } Player;
 
 Player player;
+
+uint32_t *colorBuffer;
+SDL_Texture *colorBufferTexture;
+uint32_t *textures[8];
+
+#define TEXTURE_WIDTH 64
+#define TEXTURE_HEIGHT 64
 
 void input(void){
     SDL_Event event;
@@ -146,7 +151,37 @@ void setup(void){
     player.playerMoveX = 0;
     player.playerMoveY = 0;
     player.playerMoveAngle = 0;
-    player.playerAngle = PI / 3;
+    player.playerAngle = PI / 2;
+    
+    // allocate the amount of bytes in memory to hold the colorbuffer
+    colorBuffer = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)WIDTH * (uint32_t)HEIGHT);
+
+    colorBufferTexture = SDL_CreateTexture
+    (
+        renderer, 
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        WIDTH,
+        HEIGHT
+    );
+    
+    // create a texture with pattern of blue and black lines
+    /*wallTexture = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)TEXTURE_WIDTH * (uint32_t)TEXTURE_HEIGHT);
+
+    for(int x = 0; x < TEXTURE_WIDTH; x++){
+        for(int y = 0; y < TEXTURE_HEIGHT; y++){
+            wallTexture[(TEXTURE_WIDTH * y) + x] = (x % 8 && y % 8) ? 0xFF0000FF : 0xFF000000;
+        }
+    }*/
+
+    textures[0] = (uint32_t *) REDBRICK_TEXTURE;
+	textures[1] = (uint32_t *) PURPLESTONE_TEXTURE;
+	textures[2] = (uint32_t *) MOSSYSTONE_TEXTURE;
+	textures[3] = (uint32_t *) GRAYSTONE_TEXTURE;
+	textures[4] = (uint32_t *) COLORSTONE_TEXTURE;
+	textures[5] = (uint32_t *) BLUESTONE_TEXTURE;
+	textures[6] = (uint32_t *) WOOD_TEXTURE;
+	textures[7] = (uint32_t *) EAGLE_TEXTURE;
 }
 
 void update(void){
@@ -161,7 +196,7 @@ void update(void){
     if(player.playerMoveAngle) player.playerAngle += 0.03 * player.playerMoveAngle;
 }
 
-void drawSky(void){
+void draw_sky(void){
     SDL_Rect skyRect = {
         0,
         0, 
@@ -172,7 +207,7 @@ void drawSky(void){
     SDL_RenderFillRect(renderer, &skyRect);
 }
 
-void drawFloor(void){
+void draw_floor(void){
     SDL_Rect floorRect = {
         0,
         HEIGHT / 2,
@@ -183,12 +218,31 @@ void drawFloor(void){
     SDL_RenderFillRect(renderer, &floorRect);
 }
 
+void render_colorBuffer(void){
+    SDL_UpdateTexture
+    (
+        colorBufferTexture,
+        NULL,
+        colorBuffer,
+        (int)((uint32_t)WIDTH * sizeof(uint32_t))
+    );
+    SDL_RenderCopy(renderer, colorBufferTexture, NULL, NULL);
+}
+
+void clear_colorBuffer(uint32_t color){
+    for(int i = 0; i < WIDTH; i++){
+        for(int y = 0; y < HEIGHT; y++){
+            colorBuffer[(WIDTH * y) + i] = color;
+        }
+    }
+}
+
 void render(void){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    
-    drawSky();
-    drawFloor();
+
+//    draw_sky();
+//    draw_floor();
 
     // Calculate map and player offsets
     int mapOffsetX = floor(WIDTH / 2)- 400;
@@ -212,6 +266,8 @@ void render(void){
         float rayEndY;
         float rayDirectionX;
         float verticalDepth;
+        int textureEndY;
+        int textureY;
         if(currentSin > 0){
             rayEndX = rayStartX + MAP_SCALE;
             rayDirectionX = 1;
@@ -228,16 +284,18 @@ void render(void){
             if(currentSin <= 0)
                 mapTargetX += rayDirectionX;
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
-            if(targetSquare < 0 || targetSquare > map_realsize) break;
-            if(map[targetSquare] != 0) break;
+            if(targetSquare < 0 || targetSquare > map_realsize - 1) break;
+            if(map[targetSquare] != 0) { textureY = map[targetSquare]; break; }
             rayEndX += rayDirectionX * MAP_SCALE;
-        }
+        } textureEndY = rayEndY;
         
         // horizontal line intersection
         rayEndY = 0;
         rayEndX = 0;
         float rayDirectionY;
         float horizontalDepth;
+        int textureEndX;
+        int textureX;
         if(currentCos > 0){
             rayEndY = rayStartY + MAP_SCALE;
             rayDirectionY = 1;
@@ -255,80 +313,158 @@ void render(void){
                 mapTargetY += rayDirectionY;
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
             if(targetSquare < 0 || targetSquare > map_realsize - 1)  break;
-            if(map[targetSquare] != 0) break;
+            if(map[targetSquare] != 0) { textureX = map[targetSquare]; break; }
             rayEndY += rayDirectionY * MAP_SCALE;
-        }
+        } textureEndX = rayEndX;
         
         // 3D
         float depth = verticalDepth < horizontalDepth ? verticalDepth : horizontalDepth;
+        int textureImage = verticalDepth < horizontalDepth ? textureY : textureX;
+        int textureOffset = verticalDepth < horizontalDepth ? textureEndY : textureEndX;
+        textureOffset = floor(textureOffset - floor(textureOffset / MAP_SCALE) * MAP_SCALE);
         depth *= cos(player.playerAngle - currentAngle);        
-        float wallHeight = MIN(floor(MAP_SCALE * 800 / (depth + 0.0001)), HEIGHT);
-        SDL_Rect wall = {
+        float wallHeight = MIN(floor(MAP_SCALE * 480 / (depth + 0.0001)), 50000);
+        /*SDL_Rect wall = {
             mapOffsetX + ray,
             mapOffsetY + (HEIGHT / 2 - wallHeight / 2),
             1,
             wallHeight
         };
         SDL_RenderFillRect(renderer, &wall);
-
+        
         if(verticalDepth < horizontalDepth)
             SDL_SetRenderDrawColor(renderer, 170, 170, 170, 255);
-        else 
-            SDL_SetRenderDrawColor(renderer, 85, 85, 85, 255);
+        else
+            SDL_SetRenderDrawColor(renderer, 85, 85, 85, 255);*/
+            
+        
+//            int wallTopPixel;
+//            int wallBottomPixel;
+//            wallTopPixel = (HEIGHT / 2) - (wallHeight / 2);
+//            wallTopPixel = wallTopPixel < 0 ? 0 : wallTopPixel;
+//            
+//            wallBottomPixel = (HEIGHT / 2) + (wallHeight / 2);
+//            wallBottomPixel = wallBottomPixel > HEIGHT ? HEIGHT : wallBottomPixel;
+//            
+//            // set the color of the walls
+//            for(int y = wallTopPixel; y < wallBottomPixel; y++){
+//                colorBuffer[(WIDTH * y) + ray] = verticalDepth < horizontalDepth ? 0xFFFFFFFF : 0xFFCCCCCC;
+//            }
+//
+//            // set the color of the floor
+//            for(int y = wallBottomPixel; y < HEIGHT; y++){
+//                colorBuffer[(WIDTH * y) + ray] = 0xFF777777;
+//            }
+    
 
-        /*SDL_Texture *screenSurface;
-        SDL_Surface *img = SDL_LoadBMP("texture.bmp");
-        screenSurface = SDL_CreateTextureFromSurface(renderer, img);
-        SDL_FreeSurface(img);
-            SDL_RenderCopy(renderer, screenSurface, &wall, NULL);*/
+            int wallTopPixel;
+            int wallBottomPixel;
+            float perpDistance;
+            float distanceProjPlane;
+            float projectWallHeight;     
+            int wallStripHeight;
+            int distanceFromTop;   
+            int textureOffsetX;  
+            int textureOffsetY; 
+            int texNum;       
+            uint32_t texelColor;
+            int distance;
+
+
+//            perpDistance = depth * cos(currentAngle - player.playerAngle);
+            perpDistance = depth;
+            distanceProjPlane = (WIDTH / 2) / tan(HALF_FOV);
+            projectWallHeight = (64 / perpDistance) * distanceProjPlane;
+
+            wallStripHeight = (int)projectWallHeight;
+                            
+            wallTopPixel = (HEIGHT / 2) - (wallHeight / 2);
+            wallTopPixel = wallTopPixel < 0 ? 0 : wallTopPixel;
+            
+            wallBottomPixel = (HEIGHT / 2) + (wallHeight / 2);
+            wallBottomPixel = wallBottomPixel > HEIGHT ? HEIGHT : wallBottomPixel;
+           
+
+            // set the color of the sky
+            for(int y = 0; y < wallTopPixel; y++)
+                colorBuffer[(WIDTH * y) + ray] = 0xFF333333;
+
+            
+            if(verticalDepth < horizontalDepth) {
+                textureOffsetX = (int) textureEndY % 64;
+            } else {
+                textureOffsetX = (int) textureEndX % 64;           
+            } 
+
+            texNum = 5;
+             
+            // set the color of the walls from top to bottom
+            for(int y = wallTopPixel; y < wallBottomPixel; y++){
+                distanceFromTop = y + (wallHeight / 2) - (HALF_HEIGHT);
+                textureOffsetY = distanceFromTop * ((float)TEXTURE_HEIGHT / wallHeight);
+                
+                texelColor = textures[texNum][(TEXTURE_WIDTH * textureOffsetY) + textureOffsetX];
+                colorBuffer[(WIDTH * y) + ray] = texelColor;        
+            }
+            
+            // set the color of the floor
+            for(int y = wallBottomPixel; y < HEIGHT; y++){
+                colorBuffer[(WIDTH * y) + ray] = 0xFF777777;
+            }
+        
         
         currentAngle -= STEP_ANGLE;
     }
-    if(showMap){
-        for(int row = 0; row < MAP_SIZE; row++){
-            for(int col = 0; col < MAP_SIZE; col++){
-                int square = row * MAP_SIZE + col;
-                if(map[square] != 0){
-                    SDL_Rect squareMap = {
-                        mapOffsetX + col * 10,
-                        mapOffsetY + row * 10,
-                        10 - 1,
-                        10 - 1
-                    };
-                    SDL_SetRenderDrawColor(renderer, 0, 102, 102, 255);
-                    SDL_RenderFillRect(renderer, &squareMap);
-                } else {
-                    SDL_Rect squareMap = {
-                        mapOffsetX + col * 10,
-                        mapOffsetY + row * 10,
-                        10,
-                        10,
-                    };
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                    SDL_RenderFillRect(renderer, &squareMap);
+    
+    render_colorBuffer();
+    clear_colorBuffer(0xFF000000);
+
+     if(showMap){
+            for(int row = 0; row < MAP_SIZE; row++){
+                for(int col = 0; col < MAP_SIZE; col++){
+                    int square = row * MAP_SIZE + col;
+                    if(map[square] != 0){
+                        SDL_Rect squareMap = {
+                            mapOffsetX + col * 10,
+                            mapOffsetY + row * 10,
+                            10 - 1,
+                            10 - 1
+                        };
+                        SDL_SetRenderDrawColor(renderer, 0, 102, 102, 255);
+                        SDL_RenderFillRect(renderer, &squareMap);
+                    } else {
+                        SDL_Rect squareMap = {
+                            mapOffsetX + col * 10,
+                            mapOffsetY + row * 10,
+                            10,
+                            10,
+                        };
+                        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                        SDL_RenderFillRect(renderer, &squareMap);
+                    }
                 }
             }
-        }
-        
-        // draw the player on 2D
-        SDL_Rect player2d = {
-            playerMapX,
-            playerMapY,
-            5,
-            5
-        };
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &player2d);
-        
-        // player arm
-        SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(player.playerAngle) * 15, playerMapY + cos((player.playerAngle)) * 15);
+            
+            // draw the player on 2D
+            SDL_Rect player2d = {
+                playerMapX,
+                playerMapY,
+                5,
+                5
+            };
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &player2d);
+            
+            // player arm
+            SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(player.playerAngle) * 15, playerMapY + cos((player.playerAngle)) * 15);
     }
-    
+
     SDL_RenderPresent(renderer);
 }
 
 void destroy_window(void){
-    SDL_DestroyTexture(texture);
+    free(colorBuffer);
+    SDL_DestroyTexture(colorBufferTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -355,36 +491,12 @@ void init(void){
         exit(1);
     }
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
-                                SDL_TEXTUREACCESS_STREAMING, WIDTH,
-                                                             HEIGHT);
-
-    if(!texture){
-        fprintf(stderr, "Error creating SDL texture\n");
-        exit(1);
-    };
 }
     
 int main(void){
+
     init();
-    
     setup();
-
-/*    Uint32 start; // to handle FPS
-
-    while(gameLoop){
-        start = SDL_GetTicks();
-        input(); 
-        
-        if(1000/FPS> SDL_GetTicks() - start){
-            SDL_Delay(1000 / FPS - (SDL_GetTicks() - start));
-        }
-        
-        update();
-        render();
-
-    }*/
 
     while(gameLoop){
         Uint32 frameStart = SDL_GetTicks();
@@ -397,7 +509,6 @@ int main(void){
         Uint32 delayTime = 1000 / FPS - frameTime;
         if(delayTime > 1000 / FPS) delayTime = 0;
         SDL_Delay(delayTime);
-
 
     }
 
