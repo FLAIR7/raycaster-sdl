@@ -5,7 +5,7 @@ CFLAGS += -Wall -Wextra -Wpedantic \
           -O2 -std=c99
 
 build:
-	$(CC) $(CFLAGS) main.c -lm -lSDL2 -o main
+	$(CC) $(CFLAGS) ./src/*.c -lm -lSDL2 -o raycast
 
 run:
 	./main

@@ -1,5 +1,3 @@
-#include <SDL2/SDL_keycode.h>
-#include <SDL2/SDL_render.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
@@ -31,6 +29,7 @@
 // CONSTANTS
 SDL_Window* window;
 SDL_Renderer* renderer;
+SDL_Texture* texture;
 
 int gameLoop = 1;
 
@@ -41,7 +40,7 @@ int gameLoop = 1;
 #define MAP_SPEED   (MAP_SCALE / 2) / 10
 
 int showMap = 0;
-int map[] = {
+const int map[] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -276,6 +275,12 @@ void render(void){
             SDL_SetRenderDrawColor(renderer, 170, 170, 170, 255);
         else 
             SDL_SetRenderDrawColor(renderer, 85, 85, 85, 255);
+
+        /*SDL_Texture *screenSurface;
+        SDL_Surface *img = SDL_LoadBMP("texture.bmp");
+        screenSurface = SDL_CreateTextureFromSurface(renderer, img);
+        SDL_FreeSurface(img);
+            SDL_RenderCopy(renderer, screenSurface, &wall, NULL);*/
         
         currentAngle -= STEP_ANGLE;
     }
@@ -323,6 +328,7 @@ void render(void){
 }
 
 void destroy_window(void){
+    SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -331,18 +337,33 @@ void destroy_window(void){
 void init(void){
 
     if(SDL_Init(SDL_INIT_VIDEO) < 0){
-        fprintf(stderr, "Error");
+        fprintf(stderr, "Error in init\n");
         exit(1);
     }
 
     window = SDL_CreateWindow("My game", HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     
-    renderer = SDL_CreateRenderer(window, -1, 0);
-
-    if(!window || !renderer){
-        fprintf(stderr, "Error");
+    if(!window){
+        fprintf(stderr, "Error creating SDL window.\n");
         exit(1);
     }
+
+    renderer = SDL_CreateRenderer(window, -1, 0);
+
+    if(!renderer){
+        fprintf(stderr, "Error creating SDL renderer\n");
+        exit(1);
+    }
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+                                SDL_TEXTUREACCESS_STREAMING, WIDTH,
+                                                             HEIGHT);
+
+    if(!texture){
+        fprintf(stderr, "Error creating SDL texture\n");
+        exit(1);
+    };
 }
     
 int main(void){
@@ -350,7 +371,7 @@ int main(void){
     
     setup();
 
-    Uint32 start; // to handle FPS
+/*    Uint32 start; // to handle FPS
 
     while(gameLoop){
         start = SDL_GetTicks();
@@ -362,6 +383,21 @@ int main(void){
         
         update();
         render();
+
+    }*/
+
+    while(gameLoop){
+        Uint32 frameStart = SDL_GetTicks();
+        input();
+        update();
+        render();
+
+        Uint32 frameTime = SDL_GetTicks() - frameStart;
+        
+        Uint32 delayTime = 1000 / FPS - frameTime;
+        if(delayTime > 1000 / FPS) delayTime = 0;
+        SDL_Delay(delayTime);
+
 
     }
 

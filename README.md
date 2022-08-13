@@ -16,20 +16,20 @@ This project requires the following libraries:
 ## Compiling
 Just run a `make`, or if you like to type the command:
 
-`gcc -Wall -Wextra -pedantic -std=c99 -O2 main.c -lm -lSDL2 -o main`
+`gcc -Wall -Wextra -Wpedantic -std=c99 -O2 main.c -lm -lSDL2 -o main`
 
 ## Run
 run ./main after compiling
 
 ## Using 
 
-`Up`        move forward
-`Down`      move backward
-`Left`      turn left
-`Right`     turn right
-`LShift`    open map 
+`Up`        move forward<br/>
+`Down`      move backward<br/>
+`Left`      turn left<br/>
+`Right`     turn right<br/>
+`LShift`    open map<br/>
 
 ## Construction
-I'll probably come back here later to improve the cod :)
+I'll probably come back here later to improve the code :)
 
 
