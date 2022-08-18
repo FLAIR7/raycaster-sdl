@@ -6,20 +6,11 @@
 #include "textures.h"
 
 // SCREEN
-
 #define WIDTH           800
 #define HALF_WIDTH      400
 #define HEIGHT          600
 #define HALF_HEIGHT     300
 #define PI 3.14159265359
-
-/*#define TILE_SIZE 64
-#define WIDTH 32 * TILE_SIZE
-#define HEIGHT 32 * TILE_SIZE
-#define HALF_WIDTH (WIDTH / 2)
-#define HALF_HEIGHT (HEIGHT / 2)
-#define PI 3.14159265359*/
-
 
 // FPS
 #define FPS 60
@@ -44,37 +35,49 @@ SDL_Renderer* renderer;
 int gameLoop = 1;
 
 // MAP
-#define MAP_SIZE    20
+#define MAP_SIZE    32
 #define MAP_SCALE   64
 #define MAP_RANGE   MAP_SCALE * MAP_SIZE
 #define MAP_SPEED   (MAP_SCALE / 2) / 10
 
 int showMap = 0;
 const int map[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 
-    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 
-    1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 4, 4, 4, 4, 4, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 7, 7, 7, 7, 7, 7, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 8, 8, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 2, 6, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
 };
 int map_realsize = sizeof map / sizeof map[0]; // the lenght of the map
 
-// player
+// PLAYER
 typedef struct {
     float playerX;          
     float playerY;          
@@ -86,9 +89,19 @@ typedef struct {
 
 Player player;
 
+// TEXTURES
 uint32_t *colorBuffer;
 SDL_Texture *colorBufferTexture;
-uint32_t *textures[8];
+uint32_t *textures[] = {
+    (uint32_t *) REDBRICK_TEXTURE,
+	(uint32_t *) PURPLESTONE_TEXTURE,
+	(uint32_t *) MOSSYSTONE_TEXTURE,
+	(uint32_t *) GRAYSTONE_TEXTURE,
+	(uint32_t *) COLORSTONE_TEXTURE,
+	(uint32_t *) BLUESTONE_TEXTURE,
+	(uint32_t *) WOOD_TEXTURE,
+	(uint32_t *) EAGLE_TEXTURE,
+};
 
 #define TEXTURE_WIDTH 64
 #define TEXTURE_HEIGHT 64
@@ -141,6 +154,12 @@ void input(void){
                     showMap = 1;
                     break;
             }
+        } else if (event.type == SDL_WINDOWEVENT) {
+            switch(event.window.event) {
+                case SDL_WINDOWEVENT_CLOSE:
+                    gameLoop = 0;
+                    break;
+            }
         }
     }
 }
@@ -173,7 +192,7 @@ void setup(void){
             wallTexture[(TEXTURE_WIDTH * y) + x] = (x % 8 && y % 8) ? 0xFF0000FF : 0xFF000000;
         }
     }*/
-
+    /*
     textures[0] = (uint32_t *) REDBRICK_TEXTURE;
 	textures[1] = (uint32_t *) PURPLESTONE_TEXTURE;
 	textures[2] = (uint32_t *) MOSSYSTONE_TEXTURE;
@@ -181,7 +200,7 @@ void setup(void){
 	textures[4] = (uint32_t *) COLORSTONE_TEXTURE;
 	textures[5] = (uint32_t *) BLUESTONE_TEXTURE;
 	textures[6] = (uint32_t *) WOOD_TEXTURE;
-	textures[7] = (uint32_t *) EAGLE_TEXTURE;
+	textures[7] = (uint32_t *) EAGLE_TEXTURE;*/
 }
 
 void update(void){
@@ -241,12 +260,11 @@ void render(void){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-//    draw_sky();
-//    draw_floor();
-
     // Calculate map and player offsets
-    int mapOffsetX = floor(WIDTH / 2)- 400;
-    int mapOffsetY = 0;
+    //int mapOffsetX = floor(WIDTH / 2)- 400;
+    //int mapOffsetY = 0;
+    int mapOffsetX = floor(WIDTH / 2) - HALF_WIDTH;
+    int mapOffsetY = floor(HEIGHT / 2) - HALF_HEIGHT;
     float playerMapX = (player.playerX / MAP_SCALE) * 10 + mapOffsetX;
     float playerMapY = (player.playerY / MAP_SCALE) * 10 + mapOffsetY;
 
@@ -285,7 +303,12 @@ void render(void){
                 mapTargetX += rayDirectionX;
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
             if(targetSquare < 0 || targetSquare > map_realsize - 1) break;
-            if(map[targetSquare] != 0) { textureY = map[targetSquare]; break; }
+            if(map[targetSquare] != 0) { 
+                textureY = map[targetSquare]; 
+                //if(map[targetSquare] == 2) textureY = 5;
+                //if(map[targetSquare] == 3) textureY = 3;
+                break; 
+            }
             rayEndX += rayDirectionX * MAP_SCALE;
         } textureEndY = rayEndY;
         
@@ -313,11 +336,16 @@ void render(void){
                 mapTargetY += rayDirectionY;
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
             if(targetSquare < 0 || targetSquare > map_realsize - 1)  break;
-            if(map[targetSquare] != 0) { textureX = map[targetSquare]; break; }
+            if(map[targetSquare] != 0) { 
+                textureX = map[targetSquare]; 
+                //if(map[targetSquare] == 2) textureX = 5;
+                //if(map[targetSquare] == 3) textureX = 3;
+                break; 
+            }
             rayEndY += rayDirectionY * MAP_SCALE;
         } textureEndX = rayEndX;
         
-        // 3D
+        // 3D Projection
         float depth = verticalDepth < horizontalDepth ? verticalDepth : horizontalDepth;
         int textureImage = verticalDepth < horizontalDepth ? textureY : textureX;
         int textureOffset = verticalDepth < horizontalDepth ? textureEndY : textureEndX;
@@ -370,8 +398,6 @@ void render(void){
             uint32_t texelColor;
             int distance;
 
-
-//            perpDistance = depth * cos(currentAngle - player.playerAngle);
             perpDistance = depth;
             distanceProjPlane = (WIDTH / 2) / tan(HALF_FOV);
             projectWallHeight = (64 / perpDistance) * distanceProjPlane;
@@ -396,8 +422,10 @@ void render(void){
                 textureOffsetX = (int) textureEndX % 64;           
             } 
 
-            texNum = 5;
+            texNum = textureImage -1; // this line changes the texture in the wall
              
+            
+
             // set the color of the walls from top to bottom
             for(int y = wallTopPixel; y < wallBottomPixel; y++){
                 distanceFromTop = y + (wallHeight / 2) - (HALF_HEIGHT);
