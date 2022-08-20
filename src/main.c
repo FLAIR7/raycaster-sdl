@@ -1,3 +1,4 @@
+#include <SDL2/SDL_pixels.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,12 +43,12 @@ int gameLoop = 1;
 
 int showMap = 0;
 const int map[] = {
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, 10, 11, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
-    4, 0, 0, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 6, 6, 6, 12, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
@@ -92,7 +93,8 @@ Player player;
 // TEXTURES
 uint32_t *colorBuffer;
 SDL_Texture *colorBufferTexture;
-uint32_t *textures[] = {
+uint32_t *textures[12];
+/*uint32_t *textures[] = {
     (uint32_t *) REDBRICK_TEXTURE,
 	(uint32_t *) PURPLESTONE_TEXTURE,
 	(uint32_t *) MOSSYSTONE_TEXTURE,
@@ -101,7 +103,7 @@ uint32_t *textures[] = {
 	(uint32_t *) BLUESTONE_TEXTURE,
 	(uint32_t *) WOOD_TEXTURE,
 	(uint32_t *) EAGLE_TEXTURE,
-};
+};*/
 
 #define TEXTURE_WIDTH 64
 #define TEXTURE_HEIGHT 64
@@ -178,11 +180,13 @@ void setup(void){
     colorBufferTexture = SDL_CreateTexture
     (
         renderer, 
-        SDL_PIXELFORMAT_ARGB8888,
+        SDL_PIXELFORMAT_RGBA32,
         SDL_TEXTUREACCESS_STREAMING,
         WIDTH,
         HEIGHT
     );
+
+    loadWallTextures();
     
     // create a texture with pattern of blue and black lines
     /*wallTexture = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)TEXTURE_WIDTH * (uint32_t)TEXTURE_HEIGHT);
@@ -305,7 +309,7 @@ void render(void){
             if(targetSquare < 0 || targetSquare > map_realsize - 1) break;
             if(map[targetSquare] != 0) { 
                 textureY = map[targetSquare]; 
-                //if(map[targetSquare] == 2) textureY = 5;
+                //if(map[targetSquare] == 9) textureY = 9;
                 //if(map[targetSquare] == 3) textureY = 3;
                 break; 
             }
@@ -387,23 +391,14 @@ void render(void){
 
             int wallTopPixel;
             int wallBottomPixel;
-            float perpDistance;
-            float distanceProjPlane;
-            float projectWallHeight;     
-            int wallStripHeight;
             int distanceFromTop;   
             int textureOffsetX;  
             int textureOffsetY; 
             int texNum;       
             uint32_t texelColor;
-            int distance;
+            int texture_width;
+            int texture_height;
 
-            perpDistance = depth;
-            distanceProjPlane = (WIDTH / 2) / tan(HALF_FOV);
-            projectWallHeight = (64 / perpDistance) * distanceProjPlane;
-
-            wallStripHeight = (int)projectWallHeight;
-                            
             wallTopPixel = (HEIGHT / 2) - (wallHeight / 2);
             wallTopPixel = wallTopPixel < 0 ? 0 : wallTopPixel;
             
@@ -423,15 +418,16 @@ void render(void){
             } 
 
             texNum = textureImage -1; // this line changes the texture in the wall
-             
+            texture_width = wallTextures[texNum].width;
+            texture_height = wallTextures[texNum].height;
             
 
             // set the color of the walls from top to bottom
             for(int y = wallTopPixel; y < wallBottomPixel; y++){
                 distanceFromTop = y + (wallHeight / 2) - (HALF_HEIGHT);
-                textureOffsetY = distanceFromTop * ((float)TEXTURE_HEIGHT / wallHeight);
+                textureOffsetY = distanceFromTop * ((float)texture_height / wallHeight);
                 
-                texelColor = textures[texNum][(TEXTURE_WIDTH * textureOffsetY) + textureOffsetX];
+                texelColor = wallTextures[texNum].texture_buffer[(texture_width * textureOffsetY) + textureOffsetX];
                 colorBuffer[(WIDTH * y) + ray] = texelColor;        
             }
             
@@ -491,6 +487,7 @@ void render(void){
 }
 
 void destroy_window(void){
+    freeWallTextures();
     free(colorBuffer);
     SDL_DestroyTexture(colorBufferTexture);
     SDL_DestroyRenderer(renderer);
