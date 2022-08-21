@@ -19,7 +19,7 @@ Just run a `make`, or if you like to type the command:
 `gcc -Wall -Wextra -Wpedantic -std=c99 -O2 ./src/*.c -lm -lSDL2 -o raycast`
 
 ## Run
-run ./main after compiling
+run ./raycast after compiling
 
 ## Using 
 
