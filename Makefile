@@ -8,7 +8,7 @@ build:
 	$(CC) $(CFLAGS) ./src/*.c -lm -lSDL2 -o raycast
 
 run:
-	./main
+	./raycast
 
 clean:
-	rm -rf main
+	rm -rf raycast
