@@ -11,10 +11,8 @@ static const char* textureFileNames[12] = {
     "./assets/bluestone.png",
     "./assets/wood.png",
     "./assets/eagle.png",
-    "./assets/flag.png",
-    "./assets/hitler.png",
-    "./assets/goldeagle.png",
-    "./assets/bluedoor.png"
+    "./assets/bluedoor.png",
+    "./assets/pikuma.png",
 };
 
 void loadWallTextures(void){
