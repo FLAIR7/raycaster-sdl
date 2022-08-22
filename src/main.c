@@ -1,4 +1,3 @@
-#include <SDL2/SDL_pixels.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,16 +93,6 @@ Player player;
 uint32_t *colorBuffer;
 SDL_Texture *colorBufferTexture;
 uint32_t *textures[12];
-/*uint32_t *textures[] = {
-    (uint32_t *) REDBRICK_TEXTURE,
-	(uint32_t *) PURPLESTONE_TEXTURE,
-	(uint32_t *) MOSSYSTONE_TEXTURE,
-	(uint32_t *) GRAYSTONE_TEXTURE,
-	(uint32_t *) COLORSTONE_TEXTURE,
-	(uint32_t *) BLUESTONE_TEXTURE,
-	(uint32_t *) WOOD_TEXTURE,
-	(uint32_t *) EAGLE_TEXTURE,
-};*/
 
 #define TEXTURE_WIDTH 64
 #define TEXTURE_HEIGHT 64
@@ -196,15 +185,7 @@ void setup(void){
             wallTexture[(TEXTURE_WIDTH * y) + x] = (x % 8 && y % 8) ? 0xFF0000FF : 0xFF000000;
         }
     }*/
-    /*
-    textures[0] = (uint32_t *) REDBRICK_TEXTURE;
-	textures[1] = (uint32_t *) PURPLESTONE_TEXTURE;
-	textures[2] = (uint32_t *) MOSSYSTONE_TEXTURE;
-	textures[3] = (uint32_t *) GRAYSTONE_TEXTURE;
-	textures[4] = (uint32_t *) COLORSTONE_TEXTURE;
-	textures[5] = (uint32_t *) BLUESTONE_TEXTURE;
-	textures[6] = (uint32_t *) WOOD_TEXTURE;
-	textures[7] = (uint32_t *) EAGLE_TEXTURE;*/
+    
 }
 
 void update(void){
@@ -308,9 +289,7 @@ void render(void){
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
             if(targetSquare < 0 || targetSquare > map_realsize - 1) break;
             if(map[targetSquare] != 0) { 
-                textureY = map[targetSquare]; 
-                //if(map[targetSquare] == 9) textureY = 9;
-                //if(map[targetSquare] == 3) textureY = 3;
+                textureY = map[targetSquare];
                 break; 
             }
             rayEndX += rayDirectionX * MAP_SCALE;
@@ -341,9 +320,7 @@ void render(void){
             int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
             if(targetSquare < 0 || targetSquare > map_realsize - 1)  break;
             if(map[targetSquare] != 0) { 
-                textureX = map[targetSquare]; 
-                //if(map[targetSquare] == 2) textureX = 5;
-                //if(map[targetSquare] == 3) textureX = 3;
+                textureX = map[targetSquare];
                 break; 
             }
             rayEndY += rayDirectionY * MAP_SCALE;
@@ -356,85 +333,50 @@ void render(void){
         textureOffset = floor(textureOffset - floor(textureOffset / MAP_SCALE) * MAP_SCALE);
         depth *= cos(player.playerAngle - currentAngle);        
         float wallHeight = MIN(floor(MAP_SCALE * 480 / (depth + 0.0001)), 50000);
-        /*SDL_Rect wall = {
-            mapOffsetX + ray,
-            mapOffsetY + (HEIGHT / 2 - wallHeight / 2),
-            1,
-            wallHeight
-        };
-        SDL_RenderFillRect(renderer, &wall);
-        
-        if(verticalDepth < horizontalDepth)
-            SDL_SetRenderDrawColor(renderer, 170, 170, 170, 255);
-        else
-            SDL_SetRenderDrawColor(renderer, 85, 85, 85, 255);*/
-            
-        
-//            int wallTopPixel;
-//            int wallBottomPixel;
-//            wallTopPixel = (HEIGHT / 2) - (wallHeight / 2);
-//            wallTopPixel = wallTopPixel < 0 ? 0 : wallTopPixel;
-//            
-//            wallBottomPixel = (HEIGHT / 2) + (wallHeight / 2);
-//            wallBottomPixel = wallBottomPixel > HEIGHT ? HEIGHT : wallBottomPixel;
-//            
-//            // set the color of the walls
-//            for(int y = wallTopPixel; y < wallBottomPixel; y++){
-//                colorBuffer[(WIDTH * y) + ray] = verticalDepth < horizontalDepth ? 0xFFFFFFFF : 0xFFCCCCCC;
-//            }
-//
-//            // set the color of the floor
-//            for(int y = wallBottomPixel; y < HEIGHT; y++){
-//                colorBuffer[(WIDTH * y) + ray] = 0xFF777777;
-//            }
-    
 
-            int wallTopPixel;
-            int wallBottomPixel;
-            int distanceFromTop;   
-            int textureOffsetX;  
-            int textureOffsetY; 
-            int texNum;       
-            uint32_t texelColor;
-            int texture_width;
-            int texture_height;
+        int wallTopPixel;
+        int wallBottomPixel;
+        int distanceFromTop;   
+        int textureOffsetX;  
+        int textureOffsetY; 
+        int texNum;       
+        uint32_t texelColor;
+        int texture_width;
+        int texture_height;
 
-            wallTopPixel = (HEIGHT / 2) - (wallHeight / 2);
-            wallTopPixel = wallTopPixel < 0 ? 0 : wallTopPixel;
+        wallTopPixel = (HEIGHT / 2) - (wallHeight / 2);
+        wallTopPixel = wallTopPixel < 0 ? 0 : wallTopPixel;
             
-            wallBottomPixel = (HEIGHT / 2) + (wallHeight / 2);
-            wallBottomPixel = wallBottomPixel > HEIGHT ? HEIGHT : wallBottomPixel;
+        wallBottomPixel = (HEIGHT / 2) + (wallHeight / 2);
+        wallBottomPixel = wallBottomPixel > HEIGHT ? HEIGHT : wallBottomPixel;
            
+        // set the color of the sky
+        for(int y = 0; y < wallTopPixel; y++)
+            colorBuffer[(WIDTH * y) + ray] = 0xFF333333;
 
-            // set the color of the sky
-            for(int y = 0; y < wallTopPixel; y++)
-                colorBuffer[(WIDTH * y) + ray] = 0xFF333333;
+        if(verticalDepth < horizontalDepth) {
+            textureOffsetX = (int) textureEndY % 64;
+        } else {
+            textureOffsetX = (int) textureEndX % 64;           
+        } 
 
+        texNum = textureImage -1; // this line changes the texture in the wall
+        texture_width = wallTextures[texNum].width;
+        texture_height = wallTextures[texNum].height;
             
-            if(verticalDepth < horizontalDepth) {
-                textureOffsetX = (int) textureEndY % 64;
-            } else {
-                textureOffsetX = (int) textureEndX % 64;           
-            } 
-
-            texNum = textureImage -1; // this line changes the texture in the wall
-            texture_width = wallTextures[texNum].width;
-            texture_height = wallTextures[texNum].height;
-            
-
-            // set the color of the walls from top to bottom
-            for(int y = wallTopPixel; y < wallBottomPixel; y++){
-                distanceFromTop = y + (wallHeight / 2) - (HALF_HEIGHT);
-                textureOffsetY = distanceFromTop * ((float)texture_height / wallHeight);
+        // set the color of the walls from top to bottom
+        for(int y = wallTopPixel; y < wallBottomPixel; y++){
+            distanceFromTop = y + (wallHeight / 2) - (HALF_HEIGHT);
+            textureOffsetY = distanceFromTop * ((float)texture_height / wallHeight);
                 
-                texelColor = wallTextures[texNum].texture_buffer[(texture_width * textureOffsetY) + textureOffsetX];
-                colorBuffer[(WIDTH * y) + ray] = texelColor;        
-            }
+            texelColor = wallTextures[texNum].texture_buffer[(texture_width * textureOffsetY) + textureOffsetX];
+            colorBuffer[(WIDTH * y) + ray] = texelColor;        
+        }
             
-            // set the color of the floor
-            for(int y = wallBottomPixel; y < HEIGHT; y++){
-                colorBuffer[(WIDTH * y) + ray] = 0xFF777777;
-            }
+        // set the color of the floor
+        for(int y = wallBottomPixel; y < HEIGHT; y++){
+            colorBuffer[(WIDTH * y) + ray] = 0xFF777777;
+        }
         
         
         currentAngle -= STEP_ANGLE;
