@@ -92,7 +92,7 @@ Player player;
 // TEXTURES
 uint32_t *colorBuffer;
 SDL_Texture *colorBufferTexture;
-uint32_t *textures[12];
+uint32_t *textures[10];
 
 #define TEXTURE_WIDTH 64
 #define TEXTURE_HEIGHT 64

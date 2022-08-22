@@ -2,7 +2,7 @@
 #include "textures.h"
 #include "upng.h"
 
-static const char* textureFileNames[12] = {
+static const char* textureFileNames[10] = {
     "./assets/redbrick.png",
     "./assets/purplestone.png",
     "./assets/mossystone.png",
@@ -16,7 +16,7 @@ static const char* textureFileNames[12] = {
 };
 
 void loadWallTextures(void){
-    for(int i = 0; i < 12; i++){
+    for(int i = 0; i < 10; i++){
         upng_t* upng;
 
         upng = upng_new_from_file(textureFileNames[i]);
@@ -35,6 +35,6 @@ void loadWallTextures(void){
 }
 
 void freeWallTextures(void){
-    for(int i = 0; i < 12; i++)
+    for(int i = 0; i < 10; i++)
         upng_free(wallTextures[i].upngTexture);
 }
