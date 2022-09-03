@@ -20,19 +20,13 @@
 #define FOV         (PI / 3)
 #define HALF_FOV    (FOV / 2)
 #define STEP_ANGLE  (FOV / WIDTH);
-/*#define MIN(a,b)             \
-({                           \
-    __typeof__ (a) _a = (a); \
-    __typeof__ (b) _b = (b); \
-    _a < _b ? _a : _b;       \
-})*/
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
 // CONSTANTS
 SDL_Window* window;
 SDL_Renderer* renderer;
 
-int gameLoop = 1;
+int game_loop = 1;
 
 // MAP
 #define MAP_SIZE    32
@@ -40,7 +34,7 @@ int gameLoop = 1;
 #define MAP_RANGE   MAP_SCALE * MAP_SIZE
 #define MAP_SPEED   (MAP_SCALE / 2) / 10
 
-int showMap = 0;
+int show_map = 0;
 const int map[] = {
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
@@ -114,7 +108,7 @@ void input(void){
                     player.playerMoveAngle = 0;
                     break;
                 case SDLK_LSHIFT:
-                    showMap = 0;
+                    show_map = 0;
                     break;
             }
         }
@@ -122,10 +116,10 @@ void input(void){
         {
             switch(event.key.keysym.sym){
                 case SDL_QUIT:
-                    gameLoop = 0;
+                    game_loop = 0;
                     break;
                 case SDLK_ESCAPE:
-                    gameLoop = 0;
+                    game_loop = 0;
                     break;
                 case SDLK_UP:
                     player.playerMoveX = 1;
@@ -142,13 +136,13 @@ void input(void){
                     player.playerMoveAngle = -1;
                     break;
                 case SDLK_LSHIFT:
-                    showMap = 1;
+                    show_map = 1;
                     break;
             }
         } else if (event.type == SDL_WINDOWEVENT) {
             switch(event.window.event) {
                 case SDL_WINDOWEVENT_CLOSE:
-                    gameLoop = 0;
+                    game_loop = 0;
                     break;
             }
         }
@@ -176,16 +170,6 @@ void setup(void){
     );
 
     loadWallTextures();
-    
-    // create a texture with pattern of blue and black lines
-    /*wallTexture = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)TEXTURE_WIDTH * (uint32_t)TEXTURE_HEIGHT);
-
-    for(int x = 0; x < TEXTURE_WIDTH; x++){
-        for(int y = 0; y < TEXTURE_HEIGHT; y++){
-            wallTexture[(TEXTURE_WIDTH * y) + x] = (x % 8 && y % 8) ? 0xFF0000FF : 0xFF000000;
-        }
-    }*/
-    
 }
 
 void update(void){
@@ -198,28 +182,6 @@ void update(void){
     if(player.playerMoveX && map[mapTargetX] == 0) player.playerX += playerOffsetX * player.playerMoveX;
     if(player.playerMoveY && map[mapTargetY] == 0) player.playerY += playerOffsetY * player.playerMoveY;
     if(player.playerMoveAngle) player.playerAngle += 0.03 * player.playerMoveAngle;
-}
-
-void draw_sky(void){
-    SDL_Rect skyRect = {
-        0,
-        0, 
-        WIDTH,
-        WIDTH
-    };
-    SDL_SetRenderDrawColor(renderer, 139, 185, 249, 255);
-    SDL_RenderFillRect(renderer, &skyRect);
-}
-
-void draw_floor(void){
-    SDL_Rect floorRect = {
-        0,
-        HEIGHT / 2,
-        WIDTH,
-        HEIGHT / 2
-    };
-    SDL_SetRenderDrawColor(renderer, 52, 158, 0, 255);
-    SDL_RenderFillRect(renderer, &floorRect);
 }
 
 void render_colorBuffer(void){
@@ -385,7 +347,7 @@ void render(void){
     render_colorBuffer();
     clear_colorBuffer(0xFF000000);
 
-     if(showMap){
+     if(show_map){
             for(int row = 0; row < MAP_SIZE; row++){
                 for(int col = 0; col < MAP_SIZE; col++){
                     int square = row * MAP_SIZE + col;
@@ -465,17 +427,17 @@ int main(void){
     init();
     setup();
 
-    while(gameLoop){
-        Uint32 frameStart = SDL_GetTicks();
+    while(game_loop){
+        Uint32 frame_start = SDL_GetTicks();
         input();
         update();
         render();
 
-        Uint32 frameTime = SDL_GetTicks() - frameStart;
+        Uint32 frame_time = SDL_GetTicks() - frame_start;
         
-        Uint32 delayTime = 1000 / FPS - frameTime;
-        if(delayTime > 1000 / FPS) delayTime = 0;
-        SDL_Delay(delayTime);
+        Uint32 delay_time = 1000 / FPS - frame_time;
+        if(delay_time > 1000 / FPS) delay_time = 0;
+        SDL_Delay(delay_time);
 
     }
 
