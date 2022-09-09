@@ -37,12 +37,12 @@ int game_loop = 1;
 int show_map = 0;
 const int map[] = {
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    4, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
-    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
-    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
-    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
-    4, 0, 0, 6, 6, 6, 9, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
-    4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 4, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 4, 15, 0, 15, 4, 9, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
+    4, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7,
@@ -84,8 +84,8 @@ typedef struct {
 Player player;
 
 // TEXTURES
-uint32_t *colorBuffer;
-SDL_Texture *colorBufferTexture;
+uint32_t *color_buffer;
+SDL_Texture *color_buffer_texture;
 uint32_t *textures[10];
 
 #define TEXTURE_WIDTH 64
@@ -158,9 +158,9 @@ void setup(void){
     player.playerAngle = PI / 2;
     
     // allocate the amount of bytes in memory to hold the colorbuffer
-    colorBuffer = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)WIDTH * (uint32_t)HEIGHT);
+    color_buffer = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)WIDTH * (uint32_t)HEIGHT);
 
-    colorBufferTexture = SDL_CreateTexture
+    color_buffer_texture = SDL_CreateTexture
     (
         renderer, 
         SDL_PIXELFORMAT_RGBA32,
@@ -169,7 +169,7 @@ void setup(void){
         HEIGHT
     );
 
-    loadWallTextures();
+    load_wall_textures();
 }
 
 void update(void){
@@ -187,18 +187,18 @@ void update(void){
 void render_colorBuffer(void){
     SDL_UpdateTexture
     (
-        colorBufferTexture,
+        color_buffer_texture,
         NULL,
-        colorBuffer,
+        color_buffer,
         (int)((uint32_t)WIDTH * sizeof(uint32_t))
     );
-    SDL_RenderCopy(renderer, colorBufferTexture, NULL, NULL);
+    SDL_RenderCopy(renderer, color_buffer_texture, NULL, NULL);
 }
 
 void clear_colorBuffer(uint32_t color){
     for(int i = 0; i < WIDTH; i++){
         for(int y = 0; y < HEIGHT; y++){
-            colorBuffer[(WIDTH * y) + i] = color;
+            color_buffer[(WIDTH * y) + i] = color;
         }
     }
 }
@@ -252,6 +252,8 @@ void render(void){
             if(targetSquare < 0 || targetSquare > map_realsize - 1) break;
             if(map[targetSquare] != 0) { 
                 textureY = map[targetSquare];
+                if(map[targetSquare] == 14) textureY = 4;
+                if(map[targetSquare] == 15) textureY = 10;
                 break; 
             }
             rayEndX += rayDirectionX * MAP_SCALE;
@@ -283,6 +285,8 @@ void render(void){
             if(targetSquare < 0 || targetSquare > map_realsize - 1)  break;
             if(map[targetSquare] != 0) { 
                 textureX = map[targetSquare];
+                if(map[targetSquare] == 14) textureX = 10;
+                if(map[targetSquare] == 15) textureX = 4;
                 break; 
             }
             rayEndY += rayDirectionY * MAP_SCALE;
@@ -314,7 +318,7 @@ void render(void){
            
         // set the color of the sky
         for(int y = 0; y < wallTopPixel; y++)
-            colorBuffer[(WIDTH * y) + ray] = 0xFF333333;
+            color_buffer[(WIDTH * y) + ray] = 0xFF333333;
 
         if(verticalDepth < horizontalDepth) {
             textureOffsetX = (int) textureEndY % 64;
@@ -326,18 +330,18 @@ void render(void){
         texture_width = wallTextures[texNum].width;
         texture_height = wallTextures[texNum].height;
             
-        // set the color of the walls from top to bottom
+        // set the texture of the walls from top to bottom
         for(int y = wallTopPixel; y < wallBottomPixel; y++){
             distanceFromTop = y + (wallHeight / 2) - (HALF_HEIGHT);
             textureOffsetY = distanceFromTop * ((float)texture_height / wallHeight);
                 
             texelColor = wallTextures[texNum].texture_buffer[(texture_width * textureOffsetY) + textureOffsetX];
-            colorBuffer[(WIDTH * y) + ray] = texelColor;        
+            color_buffer[(WIDTH * y) + ray] = texelColor;        
         }
             
         // set the color of the floor
         for(int y = wallBottomPixel; y < HEIGHT; y++){
-            colorBuffer[(WIDTH * y) + ray] = 0xFF777777;
+            color_buffer[(WIDTH * y) + ray] = 0xFF777777;
         }
         
         
@@ -391,34 +395,34 @@ void render(void){
 }
 
 void destroy_window(void){
-    freeWallTextures();
-    free(colorBuffer);
-    SDL_DestroyTexture(colorBufferTexture);
+    free_wall_textures();
+    free(color_buffer);
+    SDL_DestroyTexture(color_buffer_texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
 void init(void){
-
     if(SDL_Init(SDL_INIT_VIDEO) < 0){
-        fprintf(stderr, "Error in init\n");
+        fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
         exit(1);
     }
 
-    window = SDL_CreateWindow("My game", HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Raycaster-sdl", HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     
     if(!window){
-        fprintf(stderr, "Error creating SDL window.\n");
+        fprintf(stderr, "Error creating SDL window: %s\n", SDL_GetError());
         exit(1);
     }
 
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     if(!renderer){
-        fprintf(stderr, "Error creating SDL renderer\n");
+        fprintf(stderr, "Error creating SDL renderer: %s\n", SDL_GetError());
         exit(1);
     }
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 }
     

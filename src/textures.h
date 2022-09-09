@@ -14,7 +14,7 @@ typedef struct {
 
 texture_t wallTextures[10];
 
-void loadWallTextures();
-void freeWallTextures();
+void load_wall_textures();
+void free_wall_textures();
 
 #endif
