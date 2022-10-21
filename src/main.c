@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _WIN32
+#define SDL_MAIN_HANDLED
+#endif
 #include <SDL2/SDL.h>
 #include <math.h>
 #include "textures.h"
@@ -426,7 +429,7 @@ void init(void){
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 }
     
-int main(void){
+int main(int argv, char** args){
 
     init();
     setup();

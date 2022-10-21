@@ -14,12 +14,12 @@ This project requires the following libraries:
 </ul>
 
 ## Compiling
-Just run a `make`, or if you like to type the command:
+Just run a `make`(or `mingw32-make build` if you are in windows), or if you like to type the command:
 
 `gcc -Wall -Wextra -Wpedantic -std=c99 -O2 ./src/*.c -lm -lSDL2 -o raycast`
 
 ## Run
-run `./raycast` after compiling
+run `./raycast` (or `./raycast.exe` if you are in windows) after compiling
 
 ## Using 
 
