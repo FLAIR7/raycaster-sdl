@@ -76,12 +76,12 @@ int map_realsize = sizeof map / sizeof map[0]; // the lenght of the map
 
 // PLAYER
 typedef struct {
-    float playerX;          
-    float playerY;          
-    float playerAngle;      
-    float playerMoveX;      
-    float playerMoveY;      
-    float playerMoveAngle;  
+    float player_x;          
+    float player_y;          
+    float player_angle;      
+    float player_move_x;      
+    float player_move_y;      
+    float player_move_angle;  
 } Player;
 
 Player player;
@@ -103,12 +103,12 @@ void input(void){
             switch(event.key.keysym.sym){
                 case SDLK_DOWN:
                 case SDLK_UP:
-                    player.playerMoveX = 0;
-                    player.playerMoveY = 0;
+                    player.player_move_x = 0;
+                    player.player_move_y = 0;
                     break;
                 case SDLK_RIGHT:
                 case SDLK_LEFT:
-                    player.playerMoveAngle = 0;
+                    player.player_move_angle = 0;
                     break;
                 case SDLK_LSHIFT:
                     show_map = 0;
@@ -125,18 +125,18 @@ void input(void){
                     game_loop = 0;
                     break;
                 case SDLK_UP:
-                    player.playerMoveX = 1;
-                    player.playerMoveY = 1;
+                    player.player_move_x = 1;
+                    player.player_move_y = 1;
                     break;
                 case SDLK_DOWN:
-                    player.playerMoveX = -1;
-                    player.playerMoveY = -1;
+                    player.player_move_x = -1;
+                    player.player_move_y = -1;
                     break;
                 case SDLK_LEFT:
-                    player.playerMoveAngle = 1;
+                    player.player_move_angle = 1;
                     break;
                 case SDLK_RIGHT:
-                    player.playerMoveAngle = -1;
+                    player.player_move_angle = -1;
                     break;
                 case SDLK_LSHIFT:
                     show_map = 1;
@@ -153,12 +153,12 @@ void input(void){
 }
 
 void setup(void){
-    player.playerX = MAP_SCALE + 20;
-    player.playerY = MAP_SCALE + 20;
-    player.playerMoveX = 0;
-    player.playerMoveY = 0;
-    player.playerMoveAngle = 0;
-    player.playerAngle = PI / 2;
+    player.player_x = MAP_SCALE + 20;
+    player.player_y = MAP_SCALE + 20;
+    player.player_move_x = 0;
+    player.player_move_y = 0;
+    player.player_move_angle = 0;
+    player.player_angle = PI / 2;
     
     // allocate the amount of bytes in memory to hold the colorbuffer
     color_buffer = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)WIDTH * (uint32_t)HEIGHT);
@@ -176,15 +176,15 @@ void setup(void){
 }
 
 void update(void){
-    float playerOffsetX = sin(player.playerAngle) * MAP_SPEED;
-    float playerOffsetY = cos(player.playerAngle) * MAP_SPEED;
-    int mapTargetX = floor(player.playerY / MAP_SCALE) * MAP_SIZE + floor((player.playerX + playerOffsetX * player.playerMoveX) / MAP_SCALE);
-    int mapTargetY = floor((player.playerY + playerOffsetY * player.playerMoveY) / MAP_SCALE) * MAP_SIZE + floor(player.playerX / MAP_SCALE);
+    float player_offset_x = sin(player.player_angle) * MAP_SPEED;
+    float player_offset_y = cos(player.player_angle) * MAP_SPEED;
+    int map_target_x = floor(player.player_y / MAP_SCALE) * MAP_SIZE + floor((player.player_x + player_offset_x * player.player_move_x) / MAP_SCALE);
+    int map_target_y = floor((player.player_y + player_offset_y * player.player_move_y) / MAP_SCALE) * MAP_SIZE + floor(player.player_x / MAP_SCALE);
     
     // collision
-    if(player.playerMoveX && map[mapTargetX] == 0) player.playerX += playerOffsetX * player.playerMoveX;
-    if(player.playerMoveY && map[mapTargetY] == 0) player.playerY += playerOffsetY * player.playerMoveY;
-    if(player.playerMoveAngle) player.playerAngle += 0.03 * player.playerMoveAngle;
+    if(player.player_move_x && map[map_target_x] == 0) player.player_x += player_offset_x * player.player_move_x;
+    if(player.player_move_y && map[map_target_y] == 0) player.player_y += player_offset_y * player.player_move_y;
+    if(player.player_move_angle) player.player_angle += 0.03 * player.player_move_angle;
 }
 
 void render_color_buffer(void){
@@ -211,134 +211,132 @@ void render(void){
     SDL_RenderClear(renderer);
 
     // Calculate map and player offsets
-    //int mapOffsetX = floor(WIDTH / 2)- 400;
-    //int mapOffsetY = 0;
-    int mapOffsetX = floor(WIDTH / 2) - HALF_WIDTH;
-    int mapOffsetY = floor(HEIGHT / 2) - HALF_HEIGHT;
-    float playerMapX = (player.playerX / MAP_SCALE) * 10 + mapOffsetX;
-    float playerMapY = (player.playerY / MAP_SCALE) * 10 + mapOffsetY;
+    int map_offset_x = floor(WIDTH / 2) - HALF_WIDTH;
+    int map_offset_y = floor(HEIGHT / 2) - HALF_HEIGHT;
+    float player_map_x = (player.player_x / MAP_SCALE) * 10 + map_offset_x;
+    float player_map_y = (player.player_y / MAP_SCALE) * 10 + map_offset_y;
 
     // raycasting
-    float currentAngle = player.playerAngle + HALF_FOV;
-    float rayStartX = floor(player.playerX / MAP_SCALE) * MAP_SCALE;
-    float rayStartY = floor(player.playerY / MAP_SCALE) * MAP_SCALE;
+    float current_angle = player.player_angle + HALF_FOV;
+    float ray_start_x = floor(player.player_x / MAP_SCALE) * MAP_SCALE;
+    float ray_start_y = floor(player.player_y / MAP_SCALE) * MAP_SCALE;
 
     for(int ray = 0; ray < WIDTH; ray++){
-        float currentSin = sin(currentAngle);
-        float currentCos = cos(currentAngle);
-        currentSin = currentSin ? currentSin : 0.000001;
-        currentCos = currentCos ? currentCos : 0.000001;
+        float current_sin = sin(current_angle);
+        float current_cos = cos(current_angle);
+        current_sin = current_sin ? current_sin : 0.000001;
+        current_cos = current_cos ? current_cos : 0.000001;
         
         // vertical line intersection
-        float rayEndX;
-        float rayEndY;
-        float rayDirectionX;
-        float verticalDepth;
-        int textureEndY;
-        int textureY;
-        if(currentSin > 0){
-            rayEndX = rayStartX + MAP_SCALE;
-            rayDirectionX = 1;
+        float ray_end_x;
+        float ray_end_y;
+        float ray_direction_x;
+        float vertical_depth;
+        int texture_end_y;
+        int texture_y;
+        if(current_sin > 0){
+            ray_end_x = ray_start_x + MAP_SCALE;
+            ray_direction_x = 1;
         } else {
-            rayEndX = rayStartX;
-            rayDirectionX = -1;
+            ray_end_x = ray_start_x;
+            ray_direction_x = -1;
         }
         
         for(int offset = 0; offset < MAP_RANGE; offset += MAP_SCALE){
-            verticalDepth = (rayEndX - player.playerX) / currentSin;
-            rayEndY = player.playerY + verticalDepth * currentCos;
-            float mapTargetX = floor(rayEndX / MAP_SCALE);
-            float mapTargetY = floor(rayEndY / MAP_SCALE);
-            if(currentSin <= 0)
-                mapTargetX += rayDirectionX;
-            int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
-            if(targetSquare < 0 || targetSquare > map_realsize - 1) break;
-            if(map[targetSquare] != 0) { 
-                textureY = map[targetSquare];
-                if(map[targetSquare] == 14) textureY = 4;
-                if(map[targetSquare] == 15) textureY = 10;
+            vertical_depth = (ray_end_x - player.player_x) / current_sin;
+            ray_end_y = player.player_y + vertical_depth * current_cos;
+            float map_target_x = floor(ray_end_x / MAP_SCALE);
+            float map_target_y = floor(ray_end_y / MAP_SCALE);
+            if(current_sin <= 0)
+                map_target_x += ray_direction_x;
+            int target_square = map_target_y * MAP_SIZE + map_target_x;
+            if(target_square < 0 || target_square > map_realsize - 1) break;
+            if(map[target_square] != 0) { 
+                texture_y = map[target_square];
+                if(map[target_square] == 14) texture_y = 4;
+                if(map[target_square] == 15) texture_y = 10;
                 break; 
             }
-            rayEndX += rayDirectionX * MAP_SCALE;
-        } textureEndY = rayEndY;
+            ray_end_x += ray_direction_x * MAP_SCALE;
+        } texture_end_y = ray_end_y;
         
         // horizontal line intersection
-        rayEndY = 0;
-        rayEndX = 0;
-        float rayDirectionY;
-        float horizontalDepth;
-        int textureEndX;
-        int textureX;
-        if(currentCos > 0){
-            rayEndY = rayStartY + MAP_SCALE;
-            rayDirectionY = 1;
+        ray_end_y = 0;
+        ray_end_x = 0;
+        float ray_direction_y;
+        float horizontal_depth;
+        int texture_end_x;
+        int texture_x;
+        if(current_cos > 0){
+            ray_end_y = ray_start_y + MAP_SCALE;
+            ray_direction_y = 1;
         } else {
-            rayEndY = rayStartY;
-            rayDirectionY = -1;
+            ray_end_y = ray_start_y;
+            ray_direction_y = -1;
         }
 
         for(int offset = 0; offset < MAP_RANGE; offset += MAP_SCALE){
-            horizontalDepth = (rayEndY - player.playerY) / currentCos;
-            rayEndX = player.playerX + horizontalDepth * currentSin;
-            float mapTargetX = floor(rayEndX / MAP_SCALE);
-            float mapTargetY = floor(rayEndY / MAP_SCALE);
-            if(currentCos <= 0)
-                mapTargetY += rayDirectionY;
-            int targetSquare = mapTargetY * MAP_SIZE + mapTargetX;
-            if(targetSquare < 0 || targetSquare > map_realsize - 1)  break;
-            if(map[targetSquare] != 0) { 
-                textureX = map[targetSquare];
-                if(map[targetSquare] == 14) textureX = 10;
-                if(map[targetSquare] == 15) textureX = 4;
+            horizontal_depth = (ray_end_y - player.player_y) / current_cos;
+            ray_end_x = player.player_x + horizontal_depth * current_sin;
+            float map_target_x = floor(ray_end_x / MAP_SCALE);
+            float map_target_y = floor(ray_end_y / MAP_SCALE);
+            if(current_cos <= 0)
+                map_target_y += ray_direction_y;
+            int target_square = map_target_y * MAP_SIZE + map_target_x;
+            if(target_square < 0 || target_square > map_realsize - 1)  break;
+            if(map[target_square] != 0) { 
+                texture_x = map[target_square];
+                if(map[target_square] == 14) texture_x = 10;
+                if(map[target_square] == 15) texture_x = 4;
                 break; 
             }
-            rayEndY += rayDirectionY * MAP_SCALE;
-        } textureEndX = rayEndX;
+            ray_end_y += ray_direction_y * MAP_SCALE;
+        } texture_end_x = ray_end_x;
         
         // 3D Projection
-        float depth = verticalDepth < horizontalDepth ? verticalDepth : horizontalDepth;
-        int textureImage = verticalDepth < horizontalDepth ? textureY : textureX;
-        int textureOffset = verticalDepth < horizontalDepth ? textureEndY : textureEndX;
-        textureOffset = floor(textureOffset - floor(textureOffset / MAP_SCALE) * MAP_SCALE);
-        depth *= cos(player.playerAngle - currentAngle);        
-        float wallHeight = MIN(floor(MAP_SCALE * 480 / (depth + 0.0001)), 50000);
+        float depth = vertical_depth < horizontal_depth ? vertical_depth : horizontal_depth;
+        int texture_image = vertical_depth < horizontal_depth ? texture_y : texture_x;
+        int texture_offset = vertical_depth < horizontal_depth ? texture_end_y : texture_end_x;
+        texture_offset = floor(texture_offset - floor(texture_offset / MAP_SCALE) * MAP_SCALE);
+        depth *= cos(player.player_angle - current_angle);        
+        float wall_height = MIN(floor(MAP_SCALE * 480 / (depth + 0.0001)), 50000);
 
         int wall_top_pixel;
         int wall_bottom_pixel;
         int distance_from_top;   
         int texture_offsetX;  
         int texture_offsetY; 
-        int texNum;       
+        int tex_num;       
         uint32_t texture_color;
         int texture_width;
         int texture_height;
 
-        wall_top_pixel = (HEIGHT / 2) - (wallHeight / 2);
+        wall_top_pixel = (HEIGHT / 2) - (wall_height / 2);
         wall_top_pixel = wall_top_pixel < 0 ? 0 : wall_top_pixel;
             
-        wall_bottom_pixel = (HEIGHT / 2) + (wallHeight / 2);
+        wall_bottom_pixel = (HEIGHT / 2) + (wall_height / 2);
         wall_bottom_pixel = wall_bottom_pixel > HEIGHT ? HEIGHT : wall_bottom_pixel;
            
         // set the color of the sky
         for(int y = 0; y < wall_top_pixel; y++)
             color_buffer[(WIDTH * y) + ray] = 0xFF333333;
 
-        if(verticalDepth < horizontalDepth) {
-            texture_offsetX = (int) textureEndY % 64;
+        if(vertical_depth < horizontal_depth) {
+            texture_offsetX = (int) texture_end_y % 64;
         } else {
-            texture_offsetX = (int) textureEndX % 64;           
+            texture_offsetX = (int) texture_end_x % 64;           
         } 
 
-        texNum = textureImage -1; // this line changes the texture in the wall
-        texture_width = wallTextures[texNum].width;
-        texture_height = wallTextures[texNum].height;
+        tex_num = texture_image -1; // this line changes the texture in the wall
+        texture_width = wall_textures[tex_num].width;
+        texture_height = wall_textures[tex_num].height;
             
         // set the texture of the walls from top to bottom
         for(int y = wall_top_pixel; y < wall_bottom_pixel; y++){
-            distance_from_top = y + (wallHeight / 2) - (HALF_HEIGHT);
-            texture_offsetY = distance_from_top * ((float)texture_height / wallHeight);
+            distance_from_top = y + (wall_height / 2) - (HALF_HEIGHT);
+            texture_offsetY = distance_from_top * ((float)texture_height / wall_height);
                 
-            texture_color = wallTextures[texNum].texture_buffer[(texture_width * texture_offsetY) + texture_offsetX];
+            texture_color = wall_textures[tex_num].texture_buffer[(texture_width * texture_offsetY) + texture_offsetX];
             color_buffer[(WIDTH * y) + ray] = texture_color;        
         }
             
@@ -346,9 +344,8 @@ void render(void){
         for(int y = wall_bottom_pixel; y < HEIGHT; y++){
             color_buffer[(WIDTH * y) + ray] = 0xFF777777;
         }
-        
-        
-        currentAngle -= STEP_ANGLE;
+    
+        current_angle -= STEP_ANGLE;
     }
     
     render_color_buffer();
@@ -360,8 +357,8 @@ void render(void){
                     int square = row * MAP_SIZE + col;
                     if(map[square] != 0){
                         SDL_Rect squareMap = {
-                            mapOffsetX + col * 10,
-                            mapOffsetY + row * 10,
+                            map_offset_x + col * 10,
+                            map_offset_y + row * 10,
                             10 - 1,
                             10 - 1
                         };
@@ -369,8 +366,8 @@ void render(void){
                         SDL_RenderFillRect(renderer, &squareMap);
                     } else {
                         SDL_Rect squareMap = {
-                            mapOffsetX + col * 10,
-                            mapOffsetY + row * 10,
+                            map_offset_x + col * 10,
+                            map_offset_y + row * 10,
                             10,
                             10,
                         };
@@ -382,8 +379,8 @@ void render(void){
             
             // draw the player on 2D
             SDL_Rect player2d = {
-                playerMapX,
-                playerMapY,
+                player_map_x,
+                player_map_y,
                 5,
                 5
             };
@@ -391,7 +388,7 @@ void render(void){
             SDL_RenderFillRect(renderer, &player2d);
             
             // player arm
-            SDL_RenderDrawLine(renderer, playerMapX, playerMapY, playerMapX + sin(player.playerAngle) * 15, playerMapY + cos((player.playerAngle)) * 15);
+            SDL_RenderDrawLine(renderer, player_map_x, player_map_y, player_map_x + sin(player.player_angle) * 15, player_map_y + cos((player.player_angle)) * 15);
     }
 
     SDL_RenderPresent(renderer);

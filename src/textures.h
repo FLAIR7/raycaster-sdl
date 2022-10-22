@@ -12,7 +12,7 @@ typedef struct {
     uint32_t* texture_buffer;
 } texture_t;
 
-texture_t wallTextures[10];
+texture_t wall_textures[10];
 
 void load_wall_textures();
 void free_wall_textures();
