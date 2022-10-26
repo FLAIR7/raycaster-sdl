@@ -1,41 +1,10 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#ifdef _WIN32
-#define SDL_MAIN_HANDLED
-#endif
-#include <SDL2/SDL.h>
-#include <math.h>
-#include "textures.h"
-
-// SCREEN
-#define WIDTH           800
-#define HALF_WIDTH      400
-#define HEIGHT          600
-#define HALF_HEIGHT     300
-#define PI 3.14159265359
-
-// FPS
-#define FPS 60
-
-// CAMERA
-#define DOUBLE_PI   (2 * PI)
-#define FOV         (PI / 3)
-#define HALF_FOV    (FOV / 2)
-#define STEP_ANGLE  (FOV / WIDTH);
-#define MIN(a,b) (((a)<(b))?(a):(b))
+#include "main.h"
 
 // CONSTANTS
 SDL_Window* window;
 SDL_Renderer* renderer;
 
 int game_loop = 1;
-
-// MAP
-#define MAP_SIZE    32
-#define MAP_SCALE   64
-#define MAP_RANGE   MAP_SCALE * MAP_SIZE
-#define MAP_SPEED   (MAP_SCALE / 2) / 10
 
 int show_map = 0;
 const int map[] = {
@@ -72,17 +41,7 @@ const int map[] = {
     2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
 };
-int map_realsize = sizeof map / sizeof map[0]; // the lenght of the map
-
-// PLAYER
-typedef struct {
-    float player_x;          
-    float player_y;          
-    float player_angle;      
-    float player_move_x;      
-    float player_move_y;      
-    float player_move_angle;  
-} Player;
+int map_realsize = sizeof map / sizeof map[0]; // the length of the map
 
 Player player;
 
@@ -158,7 +117,7 @@ void setup(void){
     player.player_move_x = 0;
     player.player_move_y = 0;
     player.player_move_angle = 0;
-    player.player_angle = PI / 2;
+    player.player_angle = PI / 3;
     
     // allocate the amount of bytes in memory to hold the colorbuffer
     color_buffer = (uint32_t *)malloc(sizeof(uint32_t) * (uint32_t)WIDTH * (uint32_t)HEIGHT);
@@ -178,8 +137,8 @@ void setup(void){
 void update(void){
     float player_offset_x = sin(player.player_angle) * MAP_SPEED;
     float player_offset_y = cos(player.player_angle) * MAP_SPEED;
-    int map_target_x = floor(player.player_y / MAP_SCALE) * MAP_SIZE + floor((player.player_x + player_offset_x * player.player_move_x) / MAP_SCALE);
-    int map_target_y = floor((player.player_y + player_offset_y * player.player_move_y) / MAP_SCALE) * MAP_SIZE + floor(player.player_x / MAP_SCALE);
+    int map_target_x = floor(player.player_y / MAP_SCALE) * MAP_SIZE + floor((player.player_x + player_offset_x * player.player_move_x * 10) / MAP_SCALE);
+    int map_target_y = floor((player.player_y + player_offset_y * player.player_move_y * 10) / MAP_SCALE) * MAP_SIZE + floor(player.player_x / MAP_SCALE);
     
     // collision
     if(player.player_move_x && map[map_target_x] == 0) player.player_x += player_offset_x * player.player_move_x;
@@ -356,23 +315,23 @@ void render(void){
                 for(int col = 0; col < MAP_SIZE; col++){
                     int square = row * MAP_SIZE + col;
                     if(map[square] != 0){
-                        SDL_Rect squareMap = {
+                        SDL_Rect square_map = {
                             map_offset_x + col * 10,
                             map_offset_y + row * 10,
                             10 - 1,
                             10 - 1
                         };
                         SDL_SetRenderDrawColor(renderer, 0, 102, 102, 255);
-                        SDL_RenderFillRect(renderer, &squareMap);
+                        SDL_RenderFillRect(renderer, &square_map);
                     } else {
-                        SDL_Rect squareMap = {
+                        SDL_Rect square_map = {
                             map_offset_x + col * 10,
                             map_offset_y + row * 10,
                             10,
                             10,
                         };
                         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                        SDL_RenderFillRect(renderer, &squareMap);
+                        SDL_RenderFillRect(renderer, &square_map);
                     }
                 }
             }

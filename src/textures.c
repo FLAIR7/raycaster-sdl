@@ -2,7 +2,7 @@
 #include "textures.h"
 #include "upng.h"
 
-static const char* textureFileNames[10] = {
+static const char* texture_file_names[10] = {
     "./assets/redbrick.png",
     "./assets/purplestone.png",
     "./assets/mossystone.png",
@@ -19,7 +19,7 @@ void load_wall_textures(void){
     for(int i = 0; i < 10; i++){
         upng_t* upng;
 
-        upng = upng_new_from_file(textureFileNames[i]);
+        upng = upng_new_from_file(texture_file_names[i]);
         if(upng != NULL){
             upng_decode(upng);
             if(upng_get_error(upng) == UPNG_EOK) {
