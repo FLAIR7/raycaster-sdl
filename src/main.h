@@ -9,6 +9,7 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 #include "textures.h"
+#include "map.h"
 
 // SCREEN
 #define WIDTH           800
@@ -27,12 +28,6 @@
 #define STEP_ANGLE  (FOV / WIDTH);
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
-// MAP
-#define MAP_SIZE    32
-#define MAP_SCALE   64
-#define MAP_RANGE   MAP_SCALE * MAP_SIZE
-#define MAP_SPEED   (MAP_SCALE / 2) / 10
-
 // PLAYER
 typedef struct {
     float player_x;          
@@ -42,5 +37,9 @@ typedef struct {
     float player_move_y;      
     float player_move_angle;  
 } Player;
+
+// CONSTANTS
+SDL_Window* window;
+SDL_Renderer* renderer;
 
 #endif
