@@ -8,13 +8,13 @@ Player player;
 uint32_t *color_buffer;
 SDL_Texture *color_buffer_texture;
 uint32_t *textures[10];
+SDL_Texture *gun = NULL;
 
 #define TEXTURE_WIDTH 64
 #define TEXTURE_HEIGHT 64
 
 void input(void){
     SDL_Event event;
-
     while(SDL_PollEvent(&event)){
         if(event.type == SDL_KEYUP)
         {
@@ -106,6 +106,16 @@ void update(void){
     if(player.player_move_angle) player.player_angle += 0.03 * player.player_move_angle;
 }
 
+void render_gun()
+{
+    gun = IMG_LoadTexture(renderer, "./sprites/gun_0.png");
+    int w, h;
+    SDL_QueryTexture(gun, NULL, NULL, &w, &h);		
+    SDL_Rect texr; texr.x = 200; texr.y = 220; texr.w = w*2; texr.h = h*2; 
+    SDL_RenderCopy(renderer, gun, NULL, &texr);
+    SDL_RenderPresent(renderer);
+}
+
 void render_color_buffer(void){
     SDL_UpdateTexture
     (
@@ -115,6 +125,7 @@ void render_color_buffer(void){
         (int)((uint32_t)WIDTH * sizeof(uint32_t))
     );
     SDL_RenderCopy(renderer, color_buffer_texture, NULL, NULL);
+    render_gun();
 }
 
 void clear_color_buffer(uint32_t color){
@@ -266,7 +277,7 @@ void render(void){
     
         current_angle -= STEP_ANGLE;
     }
-
+       
     render_color_buffer();
     clear_color_buffer(0xFF000000);
 
@@ -290,6 +301,7 @@ void render(void){
 }
 
 void destroy_window(void){
+    SDL_DestroyTexture(gun);
     free_wall_textures();
     free(color_buffer);
     SDL_DestroyTexture(color_buffer_texture);
@@ -304,8 +316,8 @@ void init(void){
         exit(1);
     }
 
-    window = SDL_CreateWindow("Raycaster-sdl", HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
-    
+    window = SDL_CreateWindow("Raycaster-sdl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+
     if(!window){
         fprintf(stderr, "Error creating SDL window: %s\n", SDL_GetError());
         exit(1);

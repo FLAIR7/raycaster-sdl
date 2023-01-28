@@ -7,6 +7,7 @@
 #define SDL_MAIN_HANDLED
 #endif
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <math.h>
 #include "textures.h"
 #include "map.h"
