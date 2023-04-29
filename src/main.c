@@ -9,6 +9,7 @@ uint32_t *color_buffer;
 SDL_Texture *color_buffer_texture;
 uint32_t *textures[10];
 SDL_Texture *gun = NULL;
+int gun_shot = 0;
 
 #define TEXTURE_WIDTH 64
 #define TEXTURE_HEIGHT 64
@@ -21,15 +22,22 @@ void input(void){
             switch(event.key.keysym.sym){
                 case SDLK_DOWN:
                 case SDLK_UP:
+                case SDLK_w:
+                case SDLK_s:
                     player.player_move_x = 0;
                     player.player_move_y = 0;
                     break;
                 case SDLK_RIGHT:
                 case SDLK_LEFT:
+                case SDLK_a:
+                case SDLK_d:
                     player.player_move_angle = 0;
                     break;
                 case SDLK_LSHIFT:
                     show_map = 0;
+                    break;
+                case SDLK_RETURN:
+                    gun_shot = 0;
                     break;
             }
         }
@@ -43,21 +51,28 @@ void input(void){
                     game_loop = 0;
                     break;
                 case SDLK_UP:
+                case SDLK_w:
                     player.player_move_x = 1;
                     player.player_move_y = 1;
                     break;
                 case SDLK_DOWN:
+                case SDLK_s:
                     player.player_move_x = -1;
                     player.player_move_y = -1;
                     break;
                 case SDLK_LEFT:
+                case SDLK_a:
                     player.player_move_angle = 1;
                     break;
                 case SDLK_RIGHT:
+                case SDLK_d:
                     player.player_move_angle = -1;
                     break;
                 case SDLK_LSHIFT:
                     show_map = 1;
+                    break;
+                case SDLK_RETURN:
+                    gun_shot = 1;
                     break;
             }
         } else if (event.type == SDL_WINDOWEVENT) {
@@ -66,7 +81,17 @@ void input(void){
                     game_loop = 0;
                     break;
             }
-        }
+        } /*else if(event.type == SDL_MOUSEMOTION) { 
+            static int xpos = 1;
+            xpos += event.motion.yrel;
+            player.player_move_angle = xpos;
+
+        } else if(event.type == SDL_MOUSEBUTTONDOWN) {
+            if(event.button.button == SDL_BUTTON_LEFT)
+                gun_shot = 1;
+        } else if(event.type == SDL_MOUSEBUTTONUP) {
+            gun_shot = 0;
+        }*/
     }
 }
 
@@ -108,7 +133,11 @@ void update(void){
 
 void render_gun()
 {
-    gun = IMG_LoadTexture(renderer, "./sprites/gun_0.png");
+    if(gun_shot == 1) {
+        gun = IMG_LoadTexture(renderer, "./sprites/gun_1.png");
+    } else {
+        gun = IMG_LoadTexture(renderer, "./sprites/gun_0.png");
+    }
     int w, h;
     SDL_QueryTexture(gun, NULL, NULL, &w, &h);		
     SDL_Rect texr; texr.x = 200; texr.y = 220; texr.w = w*2; texr.h = h*2; 
@@ -181,7 +210,7 @@ void render(void){
                 map_target_x += ray_direction_x;
             int target_square = map_target_y * MAP_SIZE + map_target_x;
             if(target_square < 0 || target_square > map_realsize - 1) break;
-            if(map[target_square] != 0) { 
+            if(map[target_square] != 0 && map[target_square] != 12) { 
                 texture_y = map[target_square];
                 if(map[target_square] == 14) texture_y = 4;
                 if(map[target_square] == 15) texture_y = 10;
@@ -214,7 +243,7 @@ void render(void){
                 map_target_y += ray_direction_y;
             int target_square = map_target_y * MAP_SIZE + map_target_x;
             if(target_square < 0 || target_square > map_realsize - 1)  break;
-            if(map[target_square] != 0) { 
+            if(map[target_square] != 0 && map[target_square] != 12) { 
                 texture_x = map[target_square];
                 if(map[target_square] == 14) texture_x = 10;
                 if(map[target_square] == 15) texture_x = 4;
@@ -331,12 +360,14 @@ void init(void){
     }
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
 }
     
 int main(void){
 
     init();
     setup();
+    setup_map();
 
     while(game_loop){
         Uint32 frame_start = SDL_GetTicks();

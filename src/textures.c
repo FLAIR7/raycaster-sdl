@@ -2,21 +2,22 @@
 #include "textures.h"
 #include "upng.h"
 
-static const char* texture_file_names[10] = {
+static const char* texture_file_names[11] = {
     "./assets/redbrick.png",
     "./assets/purplestone.png",
     "./assets/mossystone.png",
     "./assets/graystone.png",
     "./assets/colorstone.png",
     "./assets/bluestone.png",
+    "./assets/door.png",
     "./assets/wood.png",
     "./assets/eagle.png",
+    "./assets/door2.png",
     "./assets/bluedoor.png",
-    "./assets/door.png",
 };
 
 void load_wall_textures(void){
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 11; i++){
         upng_t* upng;
 
         upng = upng_new_from_file(texture_file_names[i]);
