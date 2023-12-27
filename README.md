@@ -1,11 +1,11 @@
 # Raycaster-SDL
 Just a simple raycaster using SDL and c.
 
-<img src="./screenshots/ray.png" alt="ray"/>
 <img src="./screenshots/3dray.png" alt="3d"/>
+<img src="./screenshots/ray.png" alt="ray"/>
 
 ## Overview
-I made this project because I want to know how raycaster works and to see how SDL works. I'm not that good in c, so if you would like to clone the repo and make some pull request, I would be so glad. (even if was just to correct my poor grammar in english, or change the variables/functions names to better names).
+I created this project because I wanted to understand how raycasters work and explore the functionalities of SDL. My C skills aren't top-notch, so if you feel like cloning the repo and making a pull request, I'd really appreciate it. It could be as simple as fixing my grammar in English or refining the names of variables and functions. Thanks a bunch!
 
 ## Requirements
 This project requires the following libraries:
